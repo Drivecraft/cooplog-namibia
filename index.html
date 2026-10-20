@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>CoopLog Namibia – Egg Farm Tracker</title>
+<style>
+:root{--bg:#FAF9F5;--card:#fff;--ink:#1F2E38;--mute:#66737c;--line:#e3e0d6;--yolk:#F2B233;--yolk-ink:#3a2a00;--green:#3F7A4A;--red:#B3412F;--shell:#8A5A3B;--amber:#9a6a00}
+@media (prefers-color-scheme:dark){:root{--bg:#14201f;--card:#1c2b2a;--ink:#f1efe6;--mute:#9db0ad;--line:#2b3f3d;--green:#79c487;--red:#ef8f7e;--shell:#d2a07c;--amber:#e8b84a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-top:env(safe-area-inset-top,0)}
+main{max-width:760px;margin:0 auto;padding:16px 16px 100px}
+h1{font-size:26px;font-weight:800;margin:8px 0 2px;letter-spacing:-.02em}
+h2{font-size:18px;margin:24px 0 8px}
+.sub{color:var(--mute);margin:0 0 14px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.stat b{display:block;font-size:24px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.stat span{color:var(--mute);font-size:13px}
+.stat.hero{grid-column:1/-1;background:var(--yolk);border-color:var(--yolk);color:var(--yolk-ink)}
+.stat.hero b{font-size:48px}.stat.hero span{color:var(--yolk-ink);opacity:.85}
+form,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--yolk);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 16px;background:var(--ink);color:var(--bg);width:100%;margin-top:14px;cursor:pointer}
+button.small{width:auto;margin:0;padding:6px 10px;font-size:13px;background:transparent;color:var(--red);border:1px solid var(--line)}
+button.alt{background:transparent;color:var(--ink);border:1px solid var(--line);margin-top:10px}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}.item small{color:var(--mute);display:block}
+.item>div:first-child{min-width:0;overflow-wrap:anywhere}
+.item .r{text-align:right;flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.empty{color:var(--mute);padding:14px;border:1px dashed var(--line);border-radius:14px;text-align:center}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;overflow-x:auto;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0));z-index:5;gap:2px}
+nav button{margin:0;background:transparent;color:var(--mute);padding:10px 12px;flex:1 0 auto;width:auto;font-size:14px;border-radius:10px}
+nav button[aria-current="true"]{background:var(--yolk);color:var(--yolk-ink)}
+.rem{padding:10px 12px;border-radius:12px;margin:6px 0;border:1px solid var(--line);background:var(--card);font-size:15px}
+.rem.bad{border-color:var(--red);color:var(--red)}.rem.warn{border-color:var(--amber);color:var(--amber)}.rem.info{color:var(--mute)}
+.warn-t{color:var(--red)}.ok-t{color:var(--green)}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:12px}tr:last-child td{border:0}
+.days{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.days label{display:flex;align-items:center;gap:5px;margin:0;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.days input{width:auto;padding:0}
+.chk{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px}
+.chk input{width:auto}
+.tabs-sub{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.tabs-sub button{margin:0;width:auto;padding:8px 12px;font-size:14px}
+.hint{font-size:13px;color:var(--mute);margin:6px 0 0}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav id="nav" aria-label="Sections"></nav>
+<script>
+/* ===== CoopLog Namibia – everything is stored in this browser (localStorage). All money is N$. ===== */
+var KEY='cooplog.na.v1';
+function DEF(){return{settings:{farm:'My Egg Farm',price:3.5,tray:30,clean:14,trayLow:2,feedLow:25},flocks:[],adjust:[],feedTypes:[],eggs:[],feedBuys:[],sprays:[],cleans:[],vendors:[],sales:[],suppliers:[],trayBuys:[]}}
+var S=DEF(),tab='home',rp=30;
+function adopt(o){var d=DEF();S=Object.assign(d,o||{});S.settings=Object.assign(DEF().settings,(o&&o.settings)||{})}
+try{var raw=localStorage.getItem(KEY);if(raw)adopt(JSON.parse(raw))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert('Could not save to this browser. Use Setup > Download backup regularly.')}}
+
+/* ---- helpers ---- */
+var $=function(id){return document.getElementById(id)};
+var N=function(id){return parseFloat($(id).value)||0};
+var V=function(id){return $(id).value.trim()};
+var uid=function(){return Date.now()*1000+Math.floor(Math.random()*1000)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pad(n){return String(n).padStart(2,'0')}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function today(){return iso(new Date())}
+function addDays(s,n){var d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)}
+function diff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5)}
+var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function dow(s){return new Date(s+'T12:00:00').getDay()}
+function nice(s){return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
+function nd(n){return (n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function money(n){return 'N$ '+nd(n)}
+function r1(n){return (Math.round(n*10)/10).toString()}
+function sumBy(a,k){return a.reduce(function(t,x){return t+(x[k]||0)},0)}
+function byId(a,id){return a.filter(function(x){return x.id===id})[0]}
+function sortD(a,b){return b.date<a.date?-1:b.date>a.date?1:b.id-a.id}
+function flockName(id){if(!id)return 'All flocks / cages';var f=byId(S.flocks,id);return f?f.name:'(removed)'}
+function feedName(id){var t=byId(S.feedTypes,id);return t?t.name:'Unspecified'}
+function henAt(f,date){return Math.max(0,f.hens+S.adjust.filter(function(a){return a.flock===f.id&&a.date<=date}).reduce(function(t,a){return t+a.delta},0))}
+function hensNow(f){return henAt(f,'9999-12-31')}
+function lastClean(fid){var d=S.cleans.filter(function(c){return c.flock===0||c.flock===fid}).map(function(c){return c.date}).sort().pop();return d||''}
+function from(){return rp?addDays(today(),-(rp-1)):''}
+function opts(list,val){return list.map(function(x){return '<option value="'+esc(x[0])+'"'+(String(x[0])===String(val)?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')}
+function flockOpts(all){var l=S.flocks.map(function(f){return [f.id,f.name+' ('+f.kind+')']});if(all)l.unshift([0,'All flocks / cages']);return l}
+function inp(id,label,o){o=o||{};return '<label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+(o.type||'text')+'" '+(o.attr||'')+' value="'+esc(o.val==null?'':o.val)+'"'+(o.list?' list="'+o.list+'"':'')+'>'}
+function sel(id,label,list,val,extra){return '<label for="'+id+'">'+label+'</label><select id="'+id+'" '+(extra||'')+'>'+opts(list,val)+'</select>'}
+function item(t,s,r,k,id){return '<div class="item"><div><b>'+t+'</b><small>'+s+'</small></div><div class="r">'+(r||'')+(k?'<button class="small" onclick="del(\''+k+'\','+id+')">Delete</button>':'')+'</div></div>'}
+function tbl(h,rows){return '<div class="tw"><table><thead><tr>'+h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>'}
+function none(t){return '<div class="empty">'+t+'</div>'}
+function needFlock(){return '<div class="empty">Add a flock or cage first.<button onclick="go(\'flocks\')">Add a flock / cage</button></div>'}
+function places(){var p={};S.vendors.forEach(function(v){if(v.place)p[v.place]=1});S.sales.forEach(function(v){if(v.place)p[v.place]=1});S.feedBuys.forEach(function(v){if(v.where)p[v.where]=1});S.suppliers.forEach(function(v){if(v.place)p[v.place]=1});return '<datalist id="places">'+Object.keys(p).map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>'}
+function del(k,id){if(!confirm('Delete this record?'))return;S[k]=S[k].filter(function(x){return x.id!==id});save();render()}
+function go(t){tab=t;render(true)}
+
+/* ---- calculations ---- */
+function fin(fromD){
+ var ok=function(d){return !fromD||d>=fromD};
+ var sales=S.sales.filter(function(s){return ok(s.date)}),eg=S.eggs.filter(function(e){return ok(e.date)});
+ var inc=sales.reduce(function(a,s){return a+s.eggs*s.price},0);
+ var feed=sumBy(S.feedBuys.filter(function(x){return ok(x.date)}),'cost'),spray=sumBy(S.sprays.filter(function(x){return ok(x.date)}),'cost'),tray=sumBy(S.trayBuys.filter(function(x){return ok(x.date)}),'cost');
+ var laid=sumBy(eg,'eggs'),broken=sumBy(eg,'broken'),sold=sumBy(sales,'eggs'),exp=feed+spray+tray;
+ return{inc:inc,feed:feed,spray:spray,tray:tray,exp:exp,profit:inc-exp,laid:laid,broken:broken,sold:sold,sales:sales,eg:eg,costEgg:laid-broken>0?exp/(laid-broken):0,avgPrice:sold?inc/sold:0}
+}
+function perHen(entries){ // sum of eggs/hens on each day = eggs per hen
+ var t=0;entries.forEach(function(e){var f=byId(S.flocks,e.flock);var h=f?henAt(f,e.date):0;if(h)t+=e.eggs/h});return t}
+function trayStock(){return sumBy(S.trayBuys,'qty')-sumBy(S.sales,'eggs')/S.settings.tray}
+function feedStock(tid){
+ var bought=S.feedBuys.filter(function(b){return b.type===tid}).reduce(function(t,b){return t+b.bags*b.bagKg},0);
+ var used=sumBy(S.eggs.filter(function(e){return e.feedType===tid}),'feedKg');return{bought:bought,used:used,left:bought-used}}
+function holds(){var t=today();return S.sprays.filter(function(s){return s.wd>0&&addDays(s.date,s.wd)>=t}).map(function(s){return s.product+' ('+flockName(s.flock)+') until '+addDays(s.date,s.wd)})}
+function cheapestTray(){var best=null;S.trayBuys.forEach(function(b){if(!b.qty)return;var p=b.cost/b.qty;if(!best||p<best.p)best={p:p,s:b.supplier}});return best}
+
+function reminders(){
+ var t=today(),o=[];
+ S.flocks.forEach(function(f){var l=lastClean(f.id),ev=S.settings.clean;
+  if(!l)o.push(['bad',esc(f.name)+': no cleaning logged yet']);
+  else{var due=diff(l,t)-ev;
+   if(due>0)o.push(['bad','Cleaning overdue: '+esc(f.name)+' ('+due+' day'+(due>1?'s':'')+' late, last cleaned '+l+')']);
+   else if(due===0)o.push(['bad','Clean today: '+esc(f.name)]);
+   else if(due>=-2)o.push(['warn','Cleaning due in '+(-due)+' day'+(due<-1?'s':'')+': '+esc(f.name)])}});
+ S.sprays.forEach(function(s){
+  if(s.wd>0&&addDays(s.date,s.wd)>=t)o.push(['bad','Do NOT sell eggs from '+esc(flockName(s.flock))+' until '+addDays(s.date,s.wd)+' ('+esc(s.product)+' withdrawal)']);
+  if(s.again>0){var nx=addDays(s.date,s.again);var later=S.sprays.some(function(x){return x.id!==s.id&&x.product===s.product&&x.flock===s.flock&&x.date>s.date});
+   if(!later&&nx<=addDays(t,3))o.push([nx<t?'bad':'warn',(nx<t?'Spray overdue: ':'Spray due '+nx+': ')+esc(s.product)+' – '+esc(flockName(s.flock))])}});
+ S.vendors.filter(function(v){return v.remind&&v.days&&v.days.length}).forEach(function(v){
+  for(var i=0;i<7;i++){var d=addDays(t,i);if(v.days.indexOf(dow(d))>-1){
+   o.push([i===0?'warn':'info',(i===0?'TODAY: ':i===1?'Tomorrow: ':DAYS[dow(d)]+': ')+'sell/deliver eggs to '+esc(v.name)+(v.place?' ('+esc(v.place)+')':'')]);break}}});
+ if(S.trayBuys.length&&trayStock()<S.settings.trayLow){var c=cheapestTray();o.push(['warn','Egg trays low ('+r1(Math.max(0,trayStock()))+' left). Buy more'+(c?' – cheapest so far: '+esc(c.s)+' at '+money(c.p)+'/tray':'')])}
+ S.feedTypes.forEach(function(ft){var st=feedStock(ft.id);if(st.bought>0&&st.left<S.settings.feedLow)o.push(['warn','Feed running low: '+esc(ft.name)+' ('+r1(Math.max(0,st.left))+' kg left)'])});
+ var rank={bad:0,warn:1,info:2};return o.sort(function(a,b){return rank[a[0]]-rank[b[0]]})}
+
+/* ---- render ---- */
+var TABS=[['home','Home'],['log','Eggs'],['sales','Sales'],['feed','Feed'],['trays','Trays'],['care','Care'],['flocks','Flocks'],['reports','Reports'],['setup','Setup']];
+function render(top){
+ $('nav').innerHTML=TABS.map(function(t){return '<button onclick="go(\''+t[0]+'\')" aria-current="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('');
+ var y=window.scrollY;
+ $('app').innerHTML=({home:home,log:logView,sales:salesView,feed:feedView,trays:traysView,care:careView,flocks:flocksView,reports:reportsView,setup:setupView})[tab]();
+ window.scrollTo(0,top?0:y);
+ var cur=document.querySelector('nav [aria-current="true"]');if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:'center',block:'nearest'})}catch(e){}
+}
+
+function home(){
+ var t=today(),te=sumBy(S.eggs.filter(function(e){return e.date===t}),'eggs');
+ var d30=addDays(t,-29),f=fin(d30),hens=S.flocks.reduce(function(a,x){return a+hensNow(x)},0);
+ var w7=S.eggs.filter(function(e){return e.date>=addDays(t,-6)});
+ var rate=0,hd=0;w7.forEach(function(e){var fl=byId(S.flocks,e.flock);if(fl)hd+=henAt(fl,e.date)});if(hd)rate=sumBy(w7,'eggs')/hd*100;
+ var stock=sumBy(S.eggs,'eggs')-sumBy(S.eggs,'broken')-sumBy(S.sales,'eggs');
+ var rem=reminders();
+ var remH=rem.length?rem.map(function(r){return '<div class="rem '+r[0]+'">'+r[1]+'</div>'}).join(''):none('No reminders. All up to date.');
+ var wk=[];for(var i=6;i>=0;i--){var d=addDays(t,-i);wk.push([d,sumBy(S.eggs.filter(function(e){return e.date===d}),'eggs')])}
+ var max=Math.max.apply(null,wk.map(function(w){return w[1]}).concat([1]));
+ var bars='<div style="display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:6px">'+wk.map(function(w){return '<div style="flex:1;text-align:center;font-size:11px;color:var(--mute)"><div style="color:var(--ink);font-size:12px">'+w[1]+'</div><div style="background:var(--shell);border-radius:6px 6px 0 0;min-height:2px;height:'+Math.round(w[1]/max*80)+'px"></div>'+DAYS[dow(w[0])].slice(0,3)+'</div>'}).join('')+'</div>';
+ return '<h1>'+esc(S.settings.farm)+'</h1><p class="sub">'+nice(t)+' · all money in N$</p>'+
+ '<div class="big"><div class="stat hero"><b>'+te+'</b><span>eggs collected today</span></div>'+
+ '<div class="stat"><b>'+r1(rate)+'%</b><span>7-day lay rate</span></div>'+
+ '<div class="stat"><b>'+hens+'</b><span>hens now</span></div>'+
+ '<div class="stat"><b>'+stock+'</b><span>eggs in hand (laid − broken − sold)</span></div>'+
+ '<div class="stat"><b>'+money(S.settings.price)+'</b><span>price per egg ('+money(S.settings.price*S.settings.tray)+' / tray of '+S.settings.tray+')</span></div>'+
+ '<div class="stat"><b>'+money(f.inc)+'</b><span>sales, 30 days</span></div>'+
+ '<div class="stat"><b>'+money(f.exp)+'</b><span>costs, 30 days</span></div>'+
+ '<div class="stat" style="grid-column:1/-1"><b class="'+(f.profit<0?'warn-t':'ok-t')+'">'+money(f.profit)+'</b><span>profit, 30 days'+(f.costEgg?' · cost per egg '+money(f.costEgg):'')+'</span></div></div>'+
+ '<h2>Reminders</h2>'+remH+'<h2>Last 7 days</h2><div class="panel">'+bars+'</div>'+
+ (S.flocks.length?'':'<h2>Get started</h2>'+needFlock());
+}
+
+/* ---- eggs ---- */
+function logView(){
+ if(!S.flocks.length)return '<h1>Eggs</h1>'+needFlock();
+ var ft=[[0,'— none —']].concat(S.feedTypes.map(function(x){return [x.id,x.name]}));
+ var days='';for(var i=0;i<14;i++){var d=addDays(today(),-i),L=S.eggs.filter(function(e){return e.date===d});
+  var e=sumBy(L,'eggs'),b=sumBy(L,'broken'),ph=perHen(L);
+  days+=item(nice(d)+(i===0?' (today)':''),L.length?b+' broken · '+(e-b)+' good · '+nd(ph).replace(/\.?0+$/,'')+' eggs/hen':'No entry',L.length?'<b>'+e+'</b>':'<span class="warn-t">–</span>')}
+ var recent=S.eggs.slice().sort(sortD).slice(0,15).map(function(e){var f=byId(S.flocks,e.flock),h=f?henAt(f,e.date):0;
+  return item(e.eggs+' eggs · '+esc(f?f.name:'(removed)'),e.date+' · '+e.broken+' broken · '+(h?nd(e.eggs/h)+' per hen ('+h+' hens)':'')+' · feed '+e.feedKg+' kg '+esc(e.feedType?feedName(e.feedType):''),'','eggs',e.id)}).join('');
+ return '<h1>Egg & feed log</h1><p class="sub">One entry per flock/cage per day. Saving the same day again replaces it.</p><form onsubmit="addEgg(event)">'+
+ sel('ef','Flock / cage',flockOpts())+inp('ed','Date',{type:'date',val:today()})+
+ '<div class="row">'+inp('ee','Eggs collected',{type:'number',attr:'inputmode="numeric" min="0" required'})+inp('eb','Broken / cracked',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+'</div>'+
+ '<div class="row">'+sel('eft','Feed given (type)',ft,0)+inp('efk','Feed used (kg)',{type:'number',attr:'inputmode="decimal" min="0" step="0.1"',val:0})+'</div>'+
+ '<button type="submit">Save entry</button></form>'+
+ '<h2>Eggs per hen, last 30 days</h2>'+perFlockTable(addDays(today(),-29))+
+ '<h2>Daily totals</h2><div class="panel">'+days+'</div><h2>Recent entries</h2><div class="panel">'+(recent||none('No entries yet.'))+'</div>';
+}
+function addEgg(e){e.preventDefault();var fl=parseInt(V('ef')),d=V('ed')||today();
+ S.eggs=S.eggs.filter(function(x){return !(x.flock===fl&&x.date===d)});
+ S.eggs.push({id:uid(),date:d,flock:fl,eggs:N('ee'),broken:N('eb'),feedType:parseInt(V('eft'))||0,feedKg:N('efk')});save();render()}
+function perFlockTable(fromD){
+ if(!S.flocks.length)return none('No flocks yet.');
+ var rows=S.flocks.map(function(f){var L=S.eggs.filter(function(e){return e.flock===f.id&&(!fromD||e.date>=fromD)});
+  var eggs=sumBy(L,'eggs'),hd=L.reduce(function(t,e){return t+henAt(f,e.date)},0),feed=sumBy(L,'feedKg'),h=hensNow(f);
+  return [esc(f.name)+' <small>('+f.kind+')</small>',h,eggs,nd(perHen(L)),hd?r1(eggs/hd*100)+'%':'–',h?nd(eggs/(L.length||1)/h)+'':'–',r1(feed)]});
+ return tbl(['Flock / cage','Hens now','Eggs','Eggs per hen','Lay rate','Eggs/hen/day','Feed kg'],rows)}
+
+/* ---- sales & vendors ---- */
+function salesView(){
+ var vopt=[[0,'Other / walk-in customer']].concat(S.vendors.map(function(v){return [v.id,v.name+(v.place?' – '+v.place:'')]}));
+ var recent=S.sales.slice().sort(sortD).slice(0,20).map(function(s){return item(esc(s.vendor)+' · '+s.eggs+' eggs',DAYS[dow(s.date)]+' '+s.date+(s.place?' · '+esc(s.place):'')+' · '+money(s.price)+'/egg'+(s.note?' · '+esc(s.note):''),'<b>'+money(s.eggs*s.price)+'</b>','sales',s.id)}).join('');
+ var vl=S.vendors.map(function(v){return item(esc(v.name),(v.place?esc(v.place)+' · ':'')+(v.days.length?v.days.map(function(d){return DAYS[d].slice(0,3)}).join(', '):'no fixed days')+(v.price?' · '+money(v.price)+'/egg':'')+(v.remind?' · reminder ON':''),'','vendors',v.id)}).join('');
+ var dchk=DAYS.map(function(d,i){return '<label><input type="checkbox" class="vd" value="'+i+'">'+d.slice(0,3)+'</label>'}).join('');
+ return '<h1>Sales</h1><p class="sub">Who bought, where, which day, and at what price per egg.</p><form onsubmit="addSale(event)">'+
+ sel('sv','Customer / vendor',vopt,0,'onchange="vendorPick()"')+inp('svo','Name (if other / walk-in)')+
+ inp('sp','Where (place / town)',{list:'places'})+inp('sd','Date',{type:'date',val:today()})+
+ '<div class="row">'+inp('st','Trays sold ('+S.settings.tray+' eggs each)',{type:'number',attr:'inputmode="numeric" min="0" step="1"',val:0})+inp('sl','Loose eggs',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+'</div>'+
+ inp('spr','Price per egg (N$)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01" required',val:S.settings.price})+
+ inp('sn','Note (optional)')+'<p class="hint" id="stot"></p><button type="submit">Save sale</button></form>'+
+ '<h2>Recent sales</h2><div class="panel">'+(recent||none('No sales yet.'))+'</div>'+
+ '<h2>Vendors & reminders</h2><form onsubmit="addVendor(event)">'+inp('vn','Vendor name',{attr:'required placeholder="Shop, market, neighbour"'})+inp('vp','Place',{list:'places'})+
+ '<label>Usual selling / delivery days</label><div class="days">'+dchk+'</div>'+
+ inp('vpr','Their price per egg (N$, optional)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01"'})+
+ '<label class="chk" style="margin-top:12px"><input type="checkbox" id="vr" checked> Remind me on those days</label><button type="submit">Add vendor</button></form>'+
+ '<div class="panel" style="margin-top:10px">'+(vl||none('No vendors yet.'))+'</div>'+places();
+}
+function vendorPick(){var v=byId(S.vendors,parseInt(V('sv')));if(v){$('sp').value=v.place||'';$('spr').value=v.price||S.settings.price}}
+function addVendor(e){e.preventDefault();var days=[].slice.call(document.querySelectorAll('.vd')).filter(function(c){return c.checked}).map(function(c){return parseInt(c.value)});
+ S.vendors.push({id:uid(),name:V('vn'),place:V('vp'),days:days,price:N('vpr'),remind:$('vr').checked});save();render()}
+function addSale(e){e.preventDefault();var eggs=N('st')*S.settings.tray+N('sl');if(eggs<=0){alert('Enter trays or eggs sold.');return}
+ var h=holds();if(h.length&&!confirm('Egg withdrawal is active for: '+h.join('; ')+'\n\nSave this sale anyway?'))return;
+ var v=byId(S.vendors,parseInt(V('sv')));
+ S.sales.push({id:uid(),date:V('sd')||today(),vendor:v?v.name:(V('svo')||'Walk-in'),place:V('sp'),eggs:eggs,price:N('spr'),note:V('sn')});save();render()}
+document.addEventListener('input',function(ev){if(tab==='sales'&&$('stot')&&/^(st|sl|spr)$/.test(ev.target.id)){var eg=N('st')*S.settings.tray+N('sl');$('stot').textContent=eg?eg+' eggs × '+money(N('spr'))+' = '+money(eg*N('spr')):''}});
+
+/* ---- feed ---- */
+function feedView(){
+ var ftOpts=S.feedTypes.map(function(x){return [x.id,x.name]});
+ var types=S.feedTypes.map(function(x){var st=feedStock(x.id);return item(esc(x.name),(x.bagKg?x.bagKg+' kg bag · ':'')+(x.note?esc(x.note)+' · ':'')+'bought '+r1(st.bought)+' kg · used '+r1(st.used)+' kg','<b class="'+(st.bought>0&&st.left<S.settings.feedLow?'warn-t':'')+'">'+r1(st.left)+' kg left</b>','feedTypes',x.id)}).join('');
+ var buys=S.feedBuys.slice().sort(sortD).slice(0,15).map(function(b){var kg=b.bags*b.bagKg;return item(esc(feedName(b.type))+' · '+b.bags+' × '+b.bagKg+' kg',b.date+' · bought at '+esc(b.where||'?')+' · '+(kg?money(b.cost/kg)+'/kg':''),'<b>'+money(b.cost)+'</b>','feedBuys',b.id)}).join('');
+ var byShop={};S.feedBuys.forEach(function(b){var w=b.where||'?',kg=b.bags*b.bagKg;if(!kg)return;(byShop[w]=byShop[w]||{c:0,k:0,n:0});byShop[w].c+=b.cost;byShop[w].k+=kg;byShop[w].n++});
+ var shops=Object.keys(byShop).sort(function(a,b){return byShop[a].c/byShop[a].k-byShop[b].c/byShop[b].k}).map(function(w){return [esc(w),byShop[w].n,r1(byShop[w].k)+' kg',money(byShop[w].c/byShop[w].k)+'/kg']});
+ return '<h1>Feed</h1><p class="sub">Types of feed, what you bought, how much, when and where.</p>'+
+ '<h2>Feed types & stock</h2><div class="panel">'+(types||none('Add the feed types you use (e.g. Layer mash, Grower, Chick starter).'))+'</div>'+
+ '<form onsubmit="addFeedType(event)" style="margin-top:10px">'+inp('fn','Feed type name',{attr:'required placeholder="Layer mash"'})+'<div class="row">'+inp('fk','Usual bag size (kg)',{type:'number',attr:'inputmode="decimal" min="0" step="0.5"',val:50})+inp('fno','Note (optional)')+'</div><button type="submit">Add feed type</button></form>'+
+ '<h2>Record a feed purchase</h2>'+(S.feedTypes.length?'<form onsubmit="addFeedBuy(event)">'+sel('bt','Feed type',ftOpts,'','onchange="bagPick()"')+inp('bd','Date bought',{type:'date',val:today()})+
+ '<div class="row">'+inp('bb','Bags',{type:'number',attr:'inputmode="decimal" min="0" step="0.5" required'})+inp('bk','Kg per bag',{type:'number',attr:'inputmode="decimal" min="0" step="0.5" required',val:S.feedTypes[0].bagKg||50})+'</div>'+
+ inp('bc','Total cost (N$)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01" required'})+inp('bw','Where bought',{attr:'placeholder="Shop / supplier / town"',list:'places'})+
+ '<button type="submit">Save purchase</button></form>':none('Add a feed type first.'))+
+ '<h2>Recent purchases</h2><div class="panel">'+(buys||none('No purchases yet.'))+'</div>'+
+ '<h2>Where is feed cheapest?</h2>'+(shops.length?tbl(['Where','Buys','Total','Avg price'],shops):none('Record purchases to compare shops.'))+places();
+}
+function bagPick(){var t=byId(S.feedTypes,parseInt(V('bt')));if(t&&t.bagKg)$('bk').value=t.bagKg}
+function addFeedType(e){e.preventDefault();S.feedTypes.push({id:uid(),name:V('fn'),bagKg:N('fk'),note:V('fno')});save();render()}
+function addFeedBuy(e){e.preventDefault();S.feedBuys.push({id:uid(),type:parseInt(V('bt')),date:V('bd')||today(),bags:N('bb'),bagKg:N('bk'),cost:N('bc'),where:V('bw')});save();render()}
+
+/* ---- egg trays ---- */
+function traysView(){
+ var st=trayStock(),c=cheapestTray();
+ var sup=S.suppliers.map(function(s){return item(esc(s.name),(s.place?esc(s.place):'')+(s.note?' · '+esc(s.note):''),'','suppliers',s.id)}).join('');
+ var buys=S.trayBuys.slice().sort(sortD).slice(0,15).map(function(b){return item(b.qty+' trays from '+esc(b.supplier||'?'),b.date+' ('+DAYS[dow(b.date)]+') · '+(b.qty?money(b.cost/b.qty)+' per tray':''),'<b>'+money(b.cost)+'</b>','trayBuys',b.id)}).join('');
+ var bySup={};S.trayBuys.forEach(function(b){if(!b.qty)return;var k=b.supplier||'?';(bySup[k]=bySup[k]||{q:0,c:0,days:{}});bySup[k].q+=b.qty;bySup[k].c+=b.cost;bySup[k].days[DAYS[dow(b.date)]]=1});
+ var cmp=Object.keys(bySup).sort(function(a,b){return bySup[a].c/bySup[a].q-bySup[b].c/bySup[b].q}).map(function(k){return [esc(k),bySup[k].q,money(bySup[k].c/bySup[k].q),Object.keys(bySup[k].days).join(', ')]});
+ return '<h1>Egg trays</h1><p class="sub">Where and when to buy trays.</p><div class="big"><div class="stat"><b class="'+(S.trayBuys.length&&st<S.settings.trayLow?'warn-t':'')+'">'+r1(Math.max(0,st))+'</b><span>trays left (bought − sold eggs ÷ '+S.settings.tray+')</span></div>'+
+ '<div class="stat"><b>'+(c?esc(c.s):'–')+'</b><span>'+(c?'cheapest: '+money(c.p)+' per tray':'cheapest supplier (needs purchases)')+'</span></div></div>'+
+ '<h2>Record tray purchase</h2><form onsubmit="addTrayBuy(event)">'+inp('tsn','Supplier / where',{attr:'required',list:'places'})+inp('td','Date bought',{type:'date',val:today()})+
+ '<div class="row">'+inp('tq','Number of trays',{type:'number',attr:'inputmode="numeric" min="1" required'})+inp('tc','Total cost (N$)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01" required'})+'</div><button type="submit">Save purchase</button></form>'+
+ '<h2>Recent tray purchases</h2><div class="panel">'+(buys||none('No tray purchases yet.'))+'</div>'+
+ '<h2>Compare suppliers</h2>'+(cmp.length?tbl(['Supplier','Trays','Avg per tray','Days bought'],cmp):none('Record purchases to compare.'))+
+ '<h2>Tray suppliers (where to buy)</h2><form onsubmit="addSupplier(event)">'+inp('sn1','Supplier name',{attr:'required'})+inp('sl1','Place / contact',{list:'places'})+inp('sno','Notes (e.g. open days, minimum order)')+'<button type="submit">Add supplier</button></form>'+
+ '<div class="panel" style="margin-top:10px">'+(sup||none('No suppliers saved yet.'))+'</div>'+places();
+}
+function addTrayBuy(e){e.preventDefault();S.trayBuys.push({id:uid(),date:V('td')||today(),supplier:V('tsn'),qty:N('tq'),cost:N('tc')});save();render()}
+function addSupplier(e){e.preventDefault();S.suppliers.push({id:uid(),name:V('sn1'),place:V('sl1'),note:V('sno')});save();render()}
+
+/* ---- care: cleaning & sprays ---- */
+var KINDS=['Pesticide / insecticide','Mite / lice spray','Disinfectant','Dewormer','Vaccine / medicine','Other'];
+function careView(){
+ var t=today(),ev=S.settings.clean;
+ var status=S.flocks.map(function(f){var l=lastClean(f.id),n=l?diff(l,t):null,late=n===null||n>=ev;
+  return item(esc(f.name),l?'Last cleaned '+l+' · next due '+addDays(l,ev):'Never cleaned','<b class="'+(late?'warn-t':'')+'">'+(n===null?'No record':n+' days ago')+'</b>')}).join('');
+ var cl=S.cleans.slice().sort(sortD).slice(0,10).map(function(c){return item(esc(c.task)+' · '+esc(flockName(c.flock)),c.date,'','cleans',c.id)}).join('');
+ var sp=S.sprays.slice().sort(sortD).slice(0,15).map(function(s){var u=s.wd>0?addDays(s.date,s.wd):'',hold=u&&u>=t;
+  return item(esc(s.product)+' · '+esc(flockName(s.flock)),s.date+' · '+esc(s.kind)+(s.again?' · repeat every '+s.again+' days':'')+(hold?' · <span class="warn-t">no egg sales until '+u+'</span>':'')+(s.notes?' · '+esc(s.notes):''),s.cost?'<b>'+money(s.cost)+'</b>':'','sprays',s.id)}).join('');
+ if(!S.flocks.length)return '<h1>Care</h1>'+needFlock();
+ return '<h1>Care</h1><p class="sub">Cleaning every '+ev+' days (change under Setup). Sprays and medicine records.</p>'+
+ '<h2>Cleaning status</h2><div class="panel">'+status+'</div>'+
+ '<h2>Log cleaning</h2><form onsubmit="addClean(event)">'+sel('cf','Flock / cage',flockOpts(true))+'<div class="row">'+sel('ct','Task',['Coop cleaned','Disinfected','Bedding changed','Feeders & drinkers washed','Cage trays emptied'].map(function(x){return [x,x]}))+inp('cd','Date',{type:'date',val:t})+'</div><button type="submit">Save cleaning</button></form>'+
+ (cl?'<h2>Recent cleaning</h2><div class="panel">'+cl+'</div>':'')+
+ '<h2>Record a spray / pesticide / medicine</h2><form onsubmit="addSpray(event)">'+inp('sprn','Product name',{attr:'required placeholder="e.g. Ectomin, Virkon, Ivermectin"'})+
+ '<div class="row">'+sel('spk','Type',KINDS.map(function(x){return [x,x]}))+sel('spf','Which flock / cage',flockOpts(true))+'</div>'+
+ '<div class="row">'+inp('spd','Date applied',{type:'date',val:t})+inp('spc','Cost (N$, optional)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01"'})+'</div>'+
+ '<div class="row">'+inp('spw','Egg withdrawal (days)',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+inp('spa','Repeat every (days, optional)',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+'</div>'+
+ inp('spn','Notes (dose, method)')+'<button type="submit">Save record</button></form>'+
+ '<h2>Spray & medicine records</h2><div class="panel">'+(sp||none('No records yet.'))+'</div>';
+}
+function addClean(e){e.preventDefault();S.cleans.push({id:uid(),flock:parseInt(V('cf')),task:V('ct'),date:V('cd')||today()});save();render()}
+function addSpray(e){e.preventDefault();S.sprays.push({id:uid(),product:V('sprn'),kind:V('spk'),flock:parseInt(V('spf')),date:V('spd')||today(),cost:N('spc'),wd:N('spw'),again:N('spa'),notes:V('spn')});save();render()}
+
+/* ---- flocks & cages ---- */
+function flocksView(){
+ var list=S.flocks.map(function(f){var h=hensNow(f);return item(esc(f.name)+' <small style="display:inline">('+f.kind+')</small>',h+' hens now · started with '+f.hens+(f.breed?' · '+esc(f.breed):'')+(f.start?' · since '+f.start:''),'<button class="small" onclick="delFlock('+f.id+')">Remove</button>')}).join('');
+ var hist=S.adjust.slice().sort(sortD).slice(0,20).map(function(a){return item((a.delta>0?'+':'')+a.delta+' hens · '+esc(flockName(a.flock)),a.date+(a.reason?' · '+esc(a.reason):''),'','adjust',a.id)}).join('');
+ return '<h1>Flocks & cages</h1><p class="sub">Each flock or cage has its own hen count, so eggs-per-hen stays accurate.</p>'+
+ '<div class="panel">'+(list||none('No flocks or cages yet.'))+'</div>'+
+ '<h2>Add flock / cage</h2><form onsubmit="addFlock(event)">'+inp('fln','Name',{attr:'required placeholder="Cage 1 / House A"'})+
+ '<div class="row">'+sel('flk','Type',[['Flock','Flock (free range / floor)'],['Cage','Cage']])+inp('flh','Number of hens',{type:'number',attr:'inputmode="numeric" min="0" required'})+'</div>'+
+ '<div class="row">'+inp('flb','Breed (optional)',{attr:'placeholder="Lohmann, Hy-Line..."'})+inp('fls','Start date',{type:'date',val:today()})+'</div><button type="submit">Add</button></form>'+
+ (S.flocks.length?'<h2>Change number of hens</h2><form onsubmit="addAdj(event)">'+sel('af','Flock / cage',flockOpts())+'<div class="row">'+sel('as','Change',[['+','Increase (+)'],['-','Decrease (−)']])+inp('an','How many hens',{type:'number',attr:'inputmode="numeric" min="1" required'})+'</div>'+
+ '<div class="row">'+inp('ad','Date',{type:'date',val:today()})+sel('ar','Reason',['New hens added','Died','Culled','Sold','Moved to another cage','Count correction'].map(function(x){return [x,x]}))+'</div><button type="submit">Save change</button></form>':'')+
+ (hist?'<h2>Hen count history</h2><div class="panel">'+hist+'</div>':'');
+}
+function addFlock(e){e.preventDefault();S.flocks.push({id:uid(),name:V('fln'),kind:V('flk'),hens:N('flh'),breed:V('flb'),start:V('fls')});save();render()}
+function addAdj(e){e.preventDefault();var n=N('an');if(!n)return;S.adjust.push({id:uid(),flock:parseInt(V('af')),date:V('ad')||today(),delta:(V('as')==='-'?-1:1)*n,reason:V('ar')});save();render()}
+function delFlock(id){if(!confirm('Remove this flock/cage and its hen-count history? Egg, feed and sales records are kept.'))return;S.flocks=S.flocks.filter(function(f){return f.id!==id});S.adjust=S.adjust.filter(function(a){return a.flock!==id});save();render()}
+
+/* ---- reports ---- */
+function reportsView(){
+ var f=fin(from()),per=[[7,'Last 7 days'],[30,'Last 30 days'],[90,'Last 90 days'],[0,'All time']];
+ var vend={},wd={};f.sales.forEach(function(s){var k=s.vendor+(s.place?' – '+s.place:'');(vend[k]=vend[k]||{e:0,m:0});vend[k].e+=s.eggs;vend[k].m+=s.eggs*s.price;var d=dow(s.date);(wd[d]=wd[d]||{e:0,m:0,n:0});wd[d].e+=s.eggs;wd[d].m+=s.eggs*s.price;wd[d].n++});
+ var vr=Object.keys(vend).sort(function(a,b){return vend[b].m-vend[a].m}).map(function(k){return [esc(k),vend[k].e,money(vend[k].m)]});
+ var wr=Object.keys(wd).map(Number).sort(function(a,b){return wd[b].m-wd[a].m}).map(function(d){return [DAYS[d],wd[d].n,wd[d].e,money(wd[d].m)]});
+ var rows=[['Egg sales',money(f.inc)],['Feed bought',money(f.feed)],['Sprays & medicine',money(f.spray)],['Egg trays',money(f.tray)],['<b>Total costs</b>','<b>'+money(f.exp)+'</b>'],['<b>Profit</b>','<b class="'+(f.profit<0?'warn-t':'ok-t')+'">'+money(f.profit)+'</b>']];
+ return '<h1>Reports</h1><p class="sub">All totals in Namibian dollars (N$).</p>'+sel('rp','Period',per,rp,'onchange="rp=parseInt(this.value);render()"')+
+ '<h2>Money</h2>'+tbl(['Item','N$'],rows)+
+ '<div class="big" style="margin-top:10px"><div class="stat"><b>'+f.laid+'</b><span>eggs laid</span></div><div class="stat"><b>'+f.sold+'</b><span>eggs sold</span></div><div class="stat"><b>'+f.broken+'</b><span>broken'+(f.laid?' ('+r1(f.broken/f.laid*100)+'%)':'')+'</span></div><div class="stat"><b>'+(f.costEgg?money(f.costEgg):'–')+'</b><span>cost per good egg · avg sold '+(f.avgPrice?money(f.avgPrice):'–')+'</span></div></div>'+
+ '<h2>Eggs per hen — by flock / cage</h2>'+perFlockTable(from())+
+ '<h2>Sales by vendor / place</h2>'+(vr.length?tbl(['Vendor','Eggs','Sales'],vr):none('No sales in this period.'))+
+ '<h2>Sales by day of the week</h2>'+(wr.length?tbl(['Day','Sales','Eggs','N$'],wr):none('No sales in this period.'));
+}
+
+/* ---- setup, backup ---- */
+function setupView(){
+ var s=S.settings;
+ return '<h1>Setup</h1><p class="sub">Defaults, backup and moving data between computers.</p><form onsubmit="saveSettings(event)">'+inp('gfarm','Farm name',{val:s.farm})+
+ '<div class="row">'+inp('gp','Default price per egg (N$)',{type:'number',attr:'step="0.01" min="0"',val:s.price})+inp('gt','Eggs per tray',{type:'number',attr:'min="1"',val:s.tray})+'</div>'+
+ '<div class="row">'+inp('gc','Clean every (days)',{type:'number',attr:'min="1"',val:s.clean})+inp('gtl','Warn when trays below',{type:'number',attr:'min="0"',val:s.trayLow})+'</div>'+
+ inp('gfl','Warn when feed below (kg)',{type:'number',attr:'min="0"',val:s.feedLow})+'<button type="submit">Save settings</button></form>'+
+ '<h2>Backup & share</h2><div class="panel"><p class="hint" style="margin-top:0">Data lives only in this browser on this computer. Download a backup often. To move it, open the app on the other computer and use <b>Restore backup</b>.</p>'+
+ '<button onclick="exportJSON()">Download backup (.json)</button><button class="alt" onclick="exportCSV(\'sales\')">Download sales (.csv for Excel)</button><button class="alt" onclick="exportCSV(\'eggs\')">Download egg log (.csv)</button><button class="alt" onclick="exportCSV(\'costs\')">Download costs (.csv)</button>'+
+ '<label for="imp">Restore backup (.json)</label><input id="imp" type="file" accept=".json,application/json" onchange="importJSON(this)"></div>'+
+ '<h2>Alerts</h2><div class="panel"><p class="hint" style="margin-top:0">Reminders show on the Home tab. You can also allow a pop-up alert whenever you open the app.</p><button class="alt" onclick="askNotify()">Allow pop-up alerts</button></div>'+
+ '<h2>Sample data</h2><div class="panel"><p class="hint" style="margin-top:0">Fills the app with made-up flocks, sales and costs so you can try it out. It replaces what is there now.</p><button class="alt" onclick="sample()">Load sample data</button><button class="alt" onclick="wipe()" style="color:var(--red)">Erase everything</button></div>';
+}
+function saveSettings(e){e.preventDefault();S.settings={farm:V('gfarm')||'My Egg Farm',price:N('gp'),tray:Math.max(1,N('gt')),clean:Math.max(1,N('gc')),trayLow:N('gtl'),feedLow:N('gfl')};save();render();alert('Saved.')}
+function download(name,text,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function exportJSON(){download('cooplog-backup-'+today()+'.json',JSON.stringify(S,null,1),'application/json')}
+function importJSON(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!Array.isArray(o.flocks))throw 0;if(!confirm('Replace the data in this app with the backup?'))return;adopt(o);save();render(true);alert('Backup restored.')}catch(e){alert('That file is not a CoopLog backup.')}};r.readAsText(f)}
+function csvCell(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function exportCSV(w){var h,rows;
+ if(w==='sales'){h=['Date','Day','Vendor','Place','Eggs','Price per egg N$','Total N$','Note'];rows=S.sales.slice().sort(sortD).map(function(s){return [s.date,DAYS[dow(s.date)],s.vendor,s.place,s.eggs,s.price,(s.eggs*s.price).toFixed(2),s.note]})}
+ else if(w==='eggs'){h=['Date','Flock/cage','Eggs','Broken','Hens that day','Eggs per hen','Feed type','Feed kg'];rows=S.eggs.slice().sort(sortD).map(function(e){var f=byId(S.flocks,e.flock),hn=f?henAt(f,e.date):0;return [e.date,flockName(e.flock),e.eggs,e.broken,hn,hn?(e.eggs/hn).toFixed(2):'',feedName(e.feedType),e.feedKg]})}
+ else{h=['Date','Category','Detail','Where','N$'];rows=[].concat(S.feedBuys.map(function(b){return [b.date,'Feed',feedName(b.type)+' '+b.bags+'x'+b.bagKg+'kg',b.where,b.cost]}),S.sprays.filter(function(s){return s.cost}).map(function(s){return [s.date,'Spray/medicine',s.product+' ('+flockName(s.flock)+')','',s.cost]}),S.trayBuys.map(function(b){return [b.date,'Egg trays',b.qty+' trays',b.supplier,b.cost]})).sort(function(a,b){return a[0]<b[0]?1:-1})}
+ download('cooplog-'+w+'-'+today()+'.csv','﻿'+[h].concat(rows).map(function(r){return r.map(csvCell).join(',')}).join('\r\n'),'text/csv')}
+function wipe(){if(confirm('Erase ALL data in this app? Download a backup first.')&&confirm('Really erase everything?')){S=DEF();save();render(true)}}
+function askNotify(){try{Notification.requestPermission().then(function(p){alert(p==='granted'?'Alerts allowed.':'Alerts not allowed in this browser.')})}catch(e){alert('This browser does not support pop-up alerts.')}}
+function notifyOnOpen(){try{if(!window.Notification||Notification.permission!=='granted')return;var k='cooplog.notified',t=today();if(localStorage.getItem(k)===t)return;
+ var r=reminders().filter(function(x){return x[0]!=='info'});if(!r.length)return;localStorage.setItem(k,t);new Notification(S.settings.farm+': '+r.length+' reminder'+(r.length>1?'s':''),{body:r.slice(0,3).map(function(x){return x[1].replace(/&[a-z#0-9]+;/g,'')}).join('\n')})}catch(e){}}
+function sample(){if(!confirm('Replace current data with sample data?'))return;
+ var t=today(),d=DEF(),i,k=0;d.settings.farm='Sample Farm, Windhoek';
+ d.flocks=[{id:1,name:'Cage 1',kind:'Cage',hens:60,breed:'Lohmann Brown',start:addDays(t,-120)},{id:2,name:'Free-range house',kind:'Flock',hens:40,breed:'Boschveld',start:addDays(t,-90)}];
+ d.adjust=[{id:11,flock:1,date:addDays(t,-40),delta:-2,reason:'Died'},{id:12,flock:2,date:addDays(t,-15),delta:10,reason:'New hens added'}];
+ d.feedTypes=[{id:21,name:'Layer mash',bagKg:50,note:''},{id:22,name:'Grower pellets',bagKg:50,note:'for new hens'}];
+ for(i=45;i>=0;i--){var dt=addDays(t,-i);k++;d.eggs.push({id:1000+k,date:dt,flock:1,eggs:44+(k*7%9),broken:k%4,feedType:21,feedKg:6.5});d.eggs.push({id:2000+k,date:dt,flock:2,eggs:24+(k*5%8),broken:k%3?0:1,feedType:21,feedKg:4.5})}
+ d.feedBuys=[{id:31,date:addDays(t,-40),type:21,bags:8,bagKg:50,cost:3200,where:'Agra Windhoek'},{id:32,date:addDays(t,-12),type:21,bags:6,bagKg:50,cost:2520,where:'Feedmaster'},{id:33,date:addDays(t,-20),type:22,bags:2,bagKg:50,cost:900,where:'Agra Windhoek'}];
+ d.vendors=[{id:41,name:'Shoprite Okuryangava',place:'Windhoek',days:[2,5],price:3.8,remind:true},{id:42,name:'Katutura Market',place:'Katutura',days:[6],price:3.5,remind:true},{id:43,name:'Mama Ndapewa',place:'Wanaheda',days:[1,4],price:3.6,remind:false}];
+ for(i=0;i<8;i++){var sd=addDays(t,-i*4-1),v=d.vendors[i%3];d.sales.push({id:5000+i,date:sd,vendor:v.name,place:v.place,eggs:30*(3+i%4),price:v.price,note:''})}
+ d.suppliers=[{id:61,name:'Packaging Hub',place:'Windhoek Industrial',note:'Open Mon-Fri'},{id:62,name:'Pick n Pay wholesale',place:'Windhoek',note:'Bulk tray packs'}];
+ d.trayBuys=[{id:71,date:addDays(t,-30),supplier:'Packaging Hub',qty:20,cost:240},{id:72,date:addDays(t,-10),supplier:'Pick n Pay wholesale',qty:10,cost:140}];
+ d.sprays=[{id:81,date:addDays(t,-6),product:'Red mite spray',kind:'Mite / lice spray',flock:2,cost:180,wd:0,again:14,notes:'sprayed perches'},{id:82,date:addDays(t,-2),product:'Ivermectin dewormer',kind:'Dewormer',flock:1,cost:120,wd:7,again:0,notes:'in drinking water'}];
+ d.cleans=[{id:91,flock:1,date:addDays(t,-13),task:'Cage trays emptied'},{id:92,flock:2,date:addDays(t,-5),task:'Coop cleaned'}];
+ adopt(d);save();render(true)}
+
+render();notifyOnOpen();
+</script>
+</body>
+</html>
