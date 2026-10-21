@@ -4,371 +4,1015 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
 <title>CoopLog Namibia – Egg Farm Tracker</title>
 <style>
-:root{--bg:#FAF9F5;--card:#fff;--ink:#1F2E38;--mute:#66737c;--line:#e3e0d6;--yolk:#F2B233;--yolk-ink:#3a2a00;--green:#3F7A4A;--red:#B3412F;--shell:#8A5A3B;--amber:#9a6a00}
-@media (prefers-color-scheme:dark){:root{--bg:#14201f;--card:#1c2b2a;--ink:#f1efe6;--mute:#9db0ad;--line:#2b3f3d;--green:#79c487;--red:#ef8f7e;--shell:#d2a07c;--amber:#e8b84a}}
+:root{--bg:#FAF9F5;--card:#fff;--ink:#1F2E38;--mute:#5a6770;--line:#d9d5c8;--yolk:#F2B233;--yolk-ink:#3a2a00;--green:#2f6b3a;--red:#a83a29;--shell:#8A5A3B;--amber:#8a5d00}
+@media (prefers-color-scheme:dark){:root{--bg:#14201f;--card:#1c2b2a;--ink:#f1efe6;--mute:#a9bbb8;--line:#33494a;--green:#79c487;--red:#ef8f7e;--shell:#d2a07c;--amber:#e8b84a}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-top:env(safe-area-inset-top,0)}
-main{max-width:760px;margin:0 auto;padding:16px 16px 100px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:780px;margin:0 auto;padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 110px max(16px,env(safe-area-inset-left,0px))}
 h1{font-size:26px;font-weight:800;margin:8px 0 2px;letter-spacing:-.02em}
-h2{font-size:18px;margin:24px 0 8px}
+h2{font-size:18px;margin:26px 0 8px}
 .sub{color:var(--mute);margin:0 0 14px}
 .big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
 .stat b{display:block;font-size:24px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
 .stat span{color:var(--mute);font-size:13px}
 .stat.hero{grid-column:1/-1;background:var(--yolk);border-color:var(--yolk);color:var(--yolk-ink)}
-.stat.hero b{font-size:48px}.stat.hero span{color:var(--yolk-ink);opacity:.85}
+.stat.hero b{font-size:48px}.stat.hero span{color:var(--yolk-ink)}
 form,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
-input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px;min-width:0}
-input:focus,select:focus,button:focus-visible{outline:3px solid var(--yolk);outline-offset:1px}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+input,select,textarea{width:100%;min-height:46px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+input[type=checkbox]{width:auto;min-height:0;accent-color:var(--green);width:20px;height:20px}
+input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
+[aria-invalid=true]{border-color:var(--red);box-shadow:0 0 0 2px var(--red)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 16px;background:var(--ink);color:var(--bg);width:100%;margin-top:14px;cursor:pointer}
-button.small{width:auto;margin:0;padding:6px 10px;font-size:13px;background:transparent;color:var(--red);border:1px solid var(--line)}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.row>*,.row3>*{min-width:0}
+input[type=date]{max-width:100%;min-width:0}
+@media (max-width:360px){.row,.row3{grid-template-columns:1fr}.quick{grid-template-columns:1fr}}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 16px;min-height:46px;background:var(--ink);color:var(--bg);width:100%;margin-top:14px;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+button.small{width:auto;margin:0;padding:8px 12px;min-height:40px;font-size:14px;background:transparent;color:var(--red);border:1px solid var(--line)}
+button.small.plain{color:var(--ink)}
 button.alt{background:transparent;color:var(--ink);border:1px solid var(--line);margin-top:10px}
 .item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .item:last-child{border:0}.item small{color:var(--mute);display:block}
 .item>div:first-child{min-width:0;overflow-wrap:anywhere}
-.item .r{text-align:right;flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.item .r{text-align:right;flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:55%}
 .empty{color:var(--mute);padding:14px;border:1px dashed var(--line);border-radius:14px;text-align:center}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;overflow-x:auto;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0));z-index:5;gap:2px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;overflow-x:auto;padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));z-index:5;gap:2px}
 nav button{margin:0;background:transparent;color:var(--mute);padding:10px 12px;flex:1 0 auto;width:auto;font-size:14px;border-radius:10px}
 nav button[aria-current="true"]{background:var(--yolk);color:var(--yolk-ink)}
-.rem{padding:10px 12px;border-radius:12px;margin:6px 0;border:1px solid var(--line);background:var(--card);font-size:15px}
+.rem{padding:10px 12px;border-radius:12px;margin:6px 0;border:1px solid var(--line);background:var(--card);font-size:15px;display:flex;justify-content:space-between;gap:10px}
+.rem a{color:inherit;font-weight:600;flex:none}
 .rem.bad{border-color:var(--red);color:var(--red)}.rem.warn{border-color:var(--amber);color:var(--amber)}.rem.info{color:var(--mute)}
 .warn-t{color:var(--red)}.ok-t{color:var(--green)}
-.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:6px}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+td a{color:var(--ink);text-decoration:underline}
 th{color:var(--mute);font-weight:600;font-size:12px}tr:last-child td{border:0}
 .days{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.days label{display:flex;align-items:center;gap:5px;margin:0;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
-.days input{width:auto;padding:0}
-.chk{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px}
-.chk input{width:auto}
-.tabs-sub{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
-.tabs-sub button{margin:0;width:auto;padding:8px 12px;font-size:14px}
+.chip{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.chk{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:15px;margin-top:14px}
+.tabs-sub{display:flex;gap:8px;flex-wrap:wrap}.tabs-sub button{width:auto}
 .hint{font-size:13px;color:var(--mute);margin:6px 0 0}
+.banner{padding:12px 14px;border-radius:12px;margin:8px 0;border:1px solid var(--line);background:var(--card)}
+.banner.bad{border-color:var(--red);color:var(--red)}.banner.info{border-color:var(--green)}
+.banner ul{margin:6px 0 0;padding-left:20px}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin:2px 0 6px}
+.status a{color:inherit}
+.ferr{color:var(--red);font-size:14px;margin-top:10px;min-height:0}
+.ferr:empty{display:none}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+.tag.ok{color:var(--green)}.tag.warn{color:var(--amber)}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.quick button{margin:0;padding:12px 6px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px}
+.bars div{flex:1;text-align:center;font-size:11px;color:var(--mute)}
+.bars i{display:block;background:var(--shell);border-radius:6px 6px 0 0;min-height:2px}
+.bars em{font-style:normal;display:block;color:var(--ink);font-size:12px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:9;max-width:90vw}
+@media print{nav,.status,button,form,.banner,#toast{display:none!important}body{background:#fff;color:#000}}
+@media (prefers-reduced-motion:no-preference){button{transition:opacity .15s}}
+
 </style>
 </head>
 <body>
-<main id="app"></main>
+<main id="app" aria-live="polite"></main>
 <nav id="nav" aria-label="Sections"></nav>
+<div id="toast" role="status" hidden></div>
+<noscript>CoopLog needs JavaScript. Please enable it in your browser.</noscript>
 <script>
-/* ===== CoopLog Namibia – everything is stored in this browser (localStorage). All money is N$. ===== */
-var KEY='cooplog.na.v1';
-function DEF(){return{settings:{farm:'My Egg Farm',price:3.5,tray:30,clean:14,trayLow:2,feedLow:25},flocks:[],adjust:[],feedTypes:[],eggs:[],feedBuys:[],sprays:[],cleans:[],vendors:[],sales:[],suppliers:[],trayBuys:[]}}
-var S=DEF(),tab='home',rp=30;
-function adopt(o){var d=DEF();S=Object.assign(d,o||{});S.settings=Object.assign(DEF().settings,(o&&o.settings)||{})}
-try{var raw=localStorage.getItem(KEY);if(raw)adopt(JSON.parse(raw))}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert('Could not save to this browser. Use Setup > Download backup regularly.')}}
+/* CoopLog Namibia core: data model, validation, stock + finance calculations, storage.
+   No DOM access, so it can be unit-tested in Node. All money is N$ (2 decimals). */
+var APP_VERSION='2.0.0',SCHEMA=2;
+var KEY='cooplog.na.v1',KEYREV='cooplog.na.rev',KEYPREV='cooplog.na.prev',KEYORIG='cooplog.na.v1-original',RPPREFIX='cooplog.na.rp.';
+var MAXTXT=200,MAXNUM=1e7,MAXEGGS=1e6,SAFE=9007199254740991;
+var COLLS=['flocks','adjust','feedTypes','eggs','moves','feedBuys','feedMoves','sprays','cleans','vendors','sales','payments','credits','expenses','suppliers','trayBuys'];
+var ORDER=['flocks','feedTypes','vendors','suppliers','adjust','eggs','moves','feedBuys','feedMoves','sprays','cleans','sales','payments','credits','expenses','trayBuys'];
+var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var EXPCATS=['Labour','Water & electricity','Transport & fuel','Repairs & equipment','Vet & medicine','Rent','Packaging','Other'];
+var METHODS=['Cash','Bank transfer','eWallet','Other','Migrated'];
+var _today=null,_u=0;
 
-/* ---- helpers ---- */
-var $=function(id){return document.getElementById(id)};
-var N=function(id){return parseFloat($(id).value)||0};
-var V=function(id){return $(id).value.trim()};
-var uid=function(){return Date.now()*1000+Math.floor(Math.random()*1000)};
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+/* ---------- small helpers ---------- */
 function pad(n){return String(n).padStart(2,'0')}
 function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function today(){return iso(new Date())}
+function today(){return _today||iso(new Date())}
+function setToday(s){_today=s}
+function isDate(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;var d=new Date(s+'T12:00:00');return !isNaN(d.getTime())&&iso(d)===s&&s>='2000-01-01'&&s<='2100-12-31'}
 function addDays(s,n){var d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)}
 function diff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5)}
-var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function dow(s){return new Date(s+'T12:00:00').getDay()}
-function nice(s){return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
-function nd(n){return (n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}
-function money(n){return 'N$ '+nd(n)}
-function r1(n){return (Math.round(n*10)/10).toString()}
-function sumBy(a,k){return a.reduce(function(t,x){return t+(x[k]||0)},0)}
-function byId(a,id){return a.filter(function(x){return x.id===id})[0]}
-function sortD(a,b){return b.date<a.date?-1:b.date>a.date?1:b.id-a.id}
-function flockName(id){if(!id)return 'All flocks / cages';var f=byId(S.flocks,id);return f?f.name:'(removed)'}
-function feedName(id){var t=byId(S.feedTypes,id);return t?t.name:'Unspecified'}
-function henAt(f,date){return Math.max(0,f.hens+S.adjust.filter(function(a){return a.flock===f.id&&a.date<=date}).reduce(function(t,a){return t+a.delta},0))}
-function hensNow(f){return henAt(f,'9999-12-31')}
-function lastClean(fid){var d=S.cleans.filter(function(c){return c.flock===0||c.flock===fid}).map(function(c){return c.date}).sort().pop();return d||''}
-function from(){return rp?addDays(today(),-(rp-1)):''}
-function opts(list,val){return list.map(function(x){return '<option value="'+esc(x[0])+'"'+(String(x[0])===String(val)?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')}
-function flockOpts(all){var l=S.flocks.map(function(f){return [f.id,f.name+' ('+f.kind+')']});if(all)l.unshift([0,'All flocks / cages']);return l}
-function inp(id,label,o){o=o||{};return '<label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+(o.type||'text')+'" '+(o.attr||'')+' value="'+esc(o.val==null?'':o.val)+'"'+(o.list?' list="'+o.list+'"':'')+'>'}
-function sel(id,label,list,val,extra){return '<label for="'+id+'">'+label+'</label><select id="'+id+'" '+(extra||'')+'>'+opts(list,val)+'</select>'}
-function item(t,s,r,k,id){return '<div class="item"><div><b>'+t+'</b><small>'+s+'</small></div><div class="r">'+(r||'')+(k?'<button class="small" onclick="del(\''+k+'\','+id+')">Delete</button>':'')+'</div></div>'}
-function tbl(h,rows){return '<div class="tw"><table><thead><tr>'+h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>'}
-function none(t){return '<div class="empty">'+t+'</div>'}
-function needFlock(){return '<div class="empty">Add a flock or cage first.<button onclick="go(\'flocks\')">Add a flock / cage</button></div>'}
+function weekStart(s){return addDays(s,-((dow(s)+6)%7))}
+function uid(){_u=(_u+1)%1000;return Date.now()*1000+_u}
+function r2(n){return Math.round((n+(n<0?-1e-9:1e-9))*100)/100}
+function cents(n){return Math.round(n*100)}
+function sumM(a,f){var c=0;a.forEach(function(x){c+=cents(f(x))});return c/100}
+function sumN(a,f){var t=0;a.forEach(function(x){t+=f(x)||0});return t}
+function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
+function byDateId(a,b){return a.date<b.date?-1:a.date>b.date?1:a.id-b.id}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function custKey(n){return String(n).trim().toLowerCase()}
+function saleTotal(s){return r2(s.eggs*s.price)}
+function VErr(msg,field){this.message=msg;this.field=field||'';this.isV=true}
+function fail(msg,field){throw new VErr(msg,field)}
+function soft(key,msg,opts){if(opts&&opts.ok&&opts.ok[key])return;var e=new VErr(msg);e.soft=key;throw e}
+
+/* ---------- schema ---------- */
+var SPEC={};
+SPEC.settings={farm:{t:'txt',max:60,def:'My Egg Farm'},price:{t:'money',min:0.01,def:3.5},tray:{t:'int',min:1,max:360,def:30},clean:{t:'int',min:1,max:365,def:14},trayLow:{t:'int',min:0,max:100000,def:2},feedLow:{t:'num',min:0,def:25},reorderDays:{t:'int',min:1,max:90,def:7},lowRatio:{t:'int',min:10,max:100,def:70},openingEggs:{t:'int',min:0,max:MAXEGGS,def:0},openingDate:{t:'date',opt:1,def:''}};
+SPEC.flocks={id:{t:'id'},name:{t:'txt',req:1,max:60},kind:{t:'enum',l:['Flock','Cage'],def:'Flock'},hens:{t:'int',req:1,max:100000},breed:{t:'txt',max:60},start:{t:'date',opt:1},status:{t:'enum',l:['active','closed'],def:'active'},closed:{t:'date',opt:1}};
+SPEC.adjust={id:{t:'id'},flock:{t:'ref',c:'flocks'},date:{t:'date'},delta:{t:'int',req:1,min:-100000,max:100000,nz:1},type:{t:'enum',l:['added','death','cull','sold','transfer','correction'],def:'correction'},reason:{t:'txt'},xfer:{t:'int',min:0,max:SAFE,def:0}};
+SPEC.feedTypes={id:{t:'id'},name:{t:'txt',req:1,max:60},bagKg:{t:'num',max:1000},note:{t:'txt'},openingKg:{t:'num',max:1e6},openingCost:{t:'money',max:100000},reorderKg:{t:'num',max:1e6}};
+SPEC.eggs={id:{t:'id'},date:{t:'date'},flock:{t:'ref',c:'flocks'},eggs:{t:'int',req:1,max:MAXEGGS},broken:{t:'int',max:MAXEGGS},rejected:{t:'int',max:MAXEGGS},grade:{t:'enum',l:['Mixed','Small','Medium','Large','Jumbo'],def:'Mixed'},feedType:{t:'ref',c:'feedTypes',zero:1},feedKg:{t:'num',max:100000}};
+SPEC.moves={id:{t:'id'},date:{t:'date'},type:{t:'enum',l:['internal','gift','loss','return','adjust','count']},eggs:{t:'int',req:1,min:-MAXEGGS,max:MAXEGGS,nz:1},note:{t:'txt'},flock:{t:'ref',c:'flocks',zero:1},link:{t:'int',min:0,max:SAFE,def:0}};
+SPEC.feedBuys={id:{t:'id'},date:{t:'date'},type:{t:'ref',c:'feedTypes'},bags:{t:'num',req:1,min:0.01,max:100000},bagKg:{t:'num',req:1,min:0.01,max:1000},cost:{t:'money',req:1},where:{t:'txt'}};
+SPEC.feedMoves={id:{t:'id'},date:{t:'date'},type:{t:'ref',c:'feedTypes'},kind:{t:'enum',l:['use','waste','adjust']},kg:{t:'num',req:1,min:-100000,max:100000,nz:1},flock:{t:'ref',c:'flocks',zero:1},note:{t:'txt'}};
+SPEC.sprays={id:{t:'id'},date:{t:'date'},product:{t:'txt',req:1},kind:{t:'txt'},flock:{t:'ref',c:'flocks',zero:1},cost:{t:'money'},wd:{t:'int',max:365},again:{t:'int',max:365},notes:{t:'txt'},verified:{t:'bool'},source:{t:'txt'}};
+SPEC.cleans={id:{t:'id'},flock:{t:'ref',c:'flocks',zero:1},task:{t:'txt',req:1},date:{t:'date'}};
+SPEC.vendors={id:{t:'id'},name:{t:'txt',req:1,max:80},place:{t:'txt'},days:{t:'days'},price:{t:'money'},remind:{t:'bool'}};
+SPEC.sales={id:{t:'id'},date:{t:'date'},vendor:{t:'txt',req:1,max:80},place:{t:'txt'},eggs:{t:'int',req:1,min:1,max:MAXEGGS},price:{t:'money',req:1,min:0.01,max:1000},note:{t:'txt'}};
+SPEC.payments={id:{t:'id'},date:{t:'date'},customer:{t:'txt',req:1,max:80},saleId:{t:'ref',c:'sales',zero:1},amount:{t:'money',req:1,min:0.01},method:{t:'enum',l:METHODS,def:'Cash'},kind:{t:'enum',l:['in','refund'],def:'in'},note:{t:'txt'},migrated:{t:'bool'},link:{t:'int',min:0,max:SAFE,def:0}};
+SPEC.credits={id:{t:'id'},date:{t:'date'},customer:{t:'txt',req:1,max:80},saleId:{t:'ref',c:'sales',zero:1},amount:{t:'money',req:1,min:0.01},reason:{t:'txt'},eggs:{t:'int',max:MAXEGGS}};
+SPEC.expenses={id:{t:'id'},date:{t:'date'},cat:{t:'enum',l:EXPCATS,def:'Other'},amt:{t:'money',req:1,min:0.01},note:{t:'txt'},method:{t:'enum',l:METHODS,def:'Cash'}};
+SPEC.suppliers={id:{t:'id'},name:{t:'txt',req:1,max:80},place:{t:'txt'},note:{t:'txt'}};
+SPEC.trayBuys={id:{t:'id'},date:{t:'date'},supplier:{t:'txt',req:1,max:80},qty:{t:'int',req:1,min:1,max:100000},cost:{t:'money',req:1}};
+var LABELS={eggs:'Eggs',broken:'Broken eggs',rejected:'Rejected eggs',feedKg:'Feed (kg)',hens:'Number of hens',delta:'Hen change',price:'Price per egg',amount:'Amount',amt:'Amount',cost:'Cost',bags:'Bags',bagKg:'Kg per bag',qty:'Number of trays',kg:'Kilograms',date:'Date',name:'Name',vendor:'Customer',customer:'Customer',product:'Product',wd:'Withdrawal days',task:'Task'};
+
+function dflt(sp){if(sp.def!==undefined)return sp.def;switch(sp.t){case 'txt':return '';case 'int':case 'num':case 'money':return 0;case 'bool':return false;case 'days':return [];case 'date':return sp.opt?'':undefined;case 'ref':return sp.zero?0:undefined;case 'obj':return null}return undefined}
+function fchk(v,sp,St){
+ if(v===undefined||v===null||(v===''&&sp.t!=='txt'&&sp.t!=='date')||(v===''&&sp.t==='date'&&!sp.opt)){var d=dflt(sp);if(d!==undefined&&!sp.req)return{v:d};return{e:'is required'}}
+ switch(sp.t){
+ case 'txt':if(typeof v==='number')v=String(v);if(typeof v!=='string')return{e:'must be text'};v=v.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').trim();if(sp.req&&!v)return{e:'is required'};if(v.length>(sp.max||MAXTXT))return{e:'is too long (max '+(sp.max||MAXTXT)+' characters)'};return{v:v};
+ case 'id':case 'int':case 'num':case 'money':
+  if(typeof v==='string'){v=v.trim();if(/^-?\d+,\d+$/.test(v))v=v.replace(',','.');if(!/^-?\d+(\.\d+)?$/.test(v))return{e:'must be a number'};v=Number(v)}
+  if(typeof v!=='number'||!isFinite(v))return{e:'must be a number'};
+  if(sp.t==='id'){if(!Number.isSafeInteger(v)||v<=0)return{e:'is not a valid id'};return{v:v}}
+  if(sp.t==='int'&&!Number.isInteger(v))return{e:'must be a whole number'};
+  if(sp.t==='money'){if(Math.abs(v*100-Math.round(v*100))>1e-6)return{e:'can have at most 2 decimals'};v=r2(v)}
+  var mn=sp.min==null?0:sp.min,mx=sp.max==null?MAXNUM:sp.max;
+  if(v<mn)return{e:'must be at least '+mn};if(v>mx)return{e:'is too large (max '+mx+')'};if(sp.nz&&v===0)return{e:'cannot be zero'};return{v:v};
+ case 'date':if(v===''&&sp.opt)return{v:''};if(!isDate(v))return{e:'is not a valid date'};return{v:v};
+ case 'enum':if(sp.l.indexOf(v)<0)return{e:'must be one of: '+sp.l.join(', ')};return{v:v};
+ case 'bool':if(v===true||v==='true')return{v:true};if(v===false||v==='false')return{v:false};return{e:'must be true or false'};
+ case 'days':if(!Array.isArray(v))return{e:'must be a list of days'};var o=[];for(var i=0;i<v.length;i++){var n=Number(v[i]);if(!Number.isInteger(n)||n<0||n>6)return{e:'has an invalid day'};if(o.indexOf(n)<0)o.push(n)}return{v:o.sort()};
+ case 'ref':
+  if(typeof v==='string'&&/^\d+$/.test(v))v=Number(v);
+  if(typeof v!=='number'||!Number.isSafeInteger(v))return{e:'is not a valid reference'};
+  if(v===0&&sp.zero)return{v:0};if(!St||!byId(St[sp.c]||[],v))return{e:'refers to a record that does not exist'};return{v:v};
+ case 'obj':if(v===null)return{v:null};if(typeof v!=='object'||Array.isArray(v))return{e:'must be an object'};if(JSON.stringify(v).length>20000)return{e:'is too large'};return{v:v};
+ }
+ return{e:'unknown field type'}}
+function cleanObj(spec,raw,St){var rec={},errs=[];raw=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{};
+ Object.keys(spec).forEach(function(k){var r=fchk(raw[k],spec[k],St);if(r.e)errs.push({field:k,msg:(LABELS[k]||k)+' '+r.e});else rec[k]=r.v});return{rec:rec,errs:errs}}
+
+/* ---------- state ---------- */
+function DEF(){var s={schema:SCHEMA,rev:0,settings:{},audit:[],quarantine:[],meta:{backupRequestedAt:'',backupConfirmedAt:'',backupChecksum:''}};
+ Object.keys(SPEC.settings).forEach(function(k){s.settings[k]=SPEC.settings[k].def});COLLS.forEach(function(c){s[c]=[]});return s}
+var S=DEF(),readonly=false,loadError='',conflict=false,storageDown=false,unsaved=false,lastSaved='',notes=[];
+
+/* ---------- migration (v1 -> v2) and ingest ---------- */
+function checksum(St){var str=JSON.stringify(COLLS.map(function(k){return St[k]}).concat([St.settings])),h1=2166136261,h2=5381,i,c;
+ for(i=0;i<str.length;i++){c=str.charCodeAt(i);h1^=c;h1=Math.imul(h1,16777619)>>>0;h2=((h2<<5)+h2+c)>>>0}return h1.toString(16)+'-'+h2.toString(16)+'-'+str.length.toString(16)}
+function dataOf(St){var d={schema:SCHEMA,settings:St.settings,audit:St.audit,quarantine:St.quarantine};COLLS.forEach(function(c){d[c]=St[c]});return d}
+function makeEnvelope(St){St=St||S;return{app:'cooplog-namibia',schema:SCHEMA,version:APP_VERSION,exportedAt:new Date().toISOString(),checksum:checksum(St),data:dataOf(St)}}
+function migrate(o){
+ var n=[];
+ if(!o||typeof o!=='object'||Array.isArray(o))throw new Error('This is not a CoopLog file.');
+ var envChecksum='';
+ if(o.app==='cooplog-namibia'){
+  if(!o.data||typeof o.data!=='object')throw new Error('The backup file has no data section.');
+  if(typeof o.schema==='number'&&o.schema>SCHEMA)throw new Error('This backup was made by a newer version of the app (schema '+o.schema+'). Update the app first.');
+  envChecksum=o.checksum||'';o=Object.assign({schema:typeof o.schema==='number'?o.schema:undefined},o.data)}
+ var ver=o.schema||1;
+ if(typeof ver!=='number'||ver>SCHEMA)throw new Error('Unsupported data version.');
+ var r={settings:o.settings||{},audit:Array.isArray(o.audit)?o.audit:[],quarantine:Array.isArray(o.quarantine)?o.quarantine:[],meta:o.meta||{}};
+ COLLS.forEach(function(c){if(o[c]!==undefined&&!Array.isArray(o[c]))throw new Error('"'+c+'" in the file is not a list.');r[c]=(o[c]||[]).slice()});
+ if(ver<2){
+  n.push('Upgraded from version 1 data.');
+  var s=r.settings;
+  if(s.farm===undefined&&o.settings===undefined)s.farm='My Egg Farm';
+  r.flocks=r.flocks.map(function(f){return Object.assign({},f,{status:'active',closed:''})});
+  r.adjust=r.adjust.map(function(a){var t='correction',rs=String(a.reason||'');if(a.delta>0)t='added';else if(/died/i.test(rs))t='death';else if(/cull/i.test(rs))t='cull';else if(/sold/i.test(rs))t='sold';else if(/moved/i.test(rs))t='transfer';return Object.assign({},a,{type:t})});
+  r.eggs=r.eggs.map(function(e){return Object.assign({rejected:0,grade:'Mixed'},e)});
+  // v1 had no payment record: assume each existing sale was paid on its date so balances start at zero
+  var pays=(r.payments||[]).slice();
+  r.sales.forEach(function(s,i){if(s&&typeof s==='object')pays.push({id:Number(s.id)+1,date:s.date,customer:s.vendor,saleId:s.id,amount:r2(Number(s.eggs)*Number(s.price)),method:'Migrated',kind:'in',note:'Created when upgrading from version 1',migrated:true})});
+  r.payments=pays;
+  // v1 allowed deleting flocks / feed types while keeping records: keep history with placeholders
+  var fl={},ft={};r.flocks.forEach(function(f){fl[f.id]=1});r.feedTypes.forEach(function(f){ft[f.id]=1});
+  function needF(id){if(id&&!fl[id]){fl[id]=1;r.flocks.push({id:id,name:'Removed flock ('+id+')',kind:'Flock',hens:0,breed:'',start:'',status:'closed',closed:'2000-01-01'});n.push('Kept history of a removed flock.')}}
+  function needT(id){if(id&&!ft[id]){ft[id]=1;r.feedTypes.push({id:id,name:'Removed feed type ('+id+')',bagKg:0,note:'',openingKg:0,openingCost:0,reorderKg:0});n.push('Kept history of a removed feed type.')}}
+  r.eggs.forEach(function(e){needF(e.flock);needT(e.feedType)});r.cleans.forEach(function(c){needF(c.flock)});r.sprays.forEach(function(c){needF(c.flock)});r.feedBuys.forEach(function(b){needT(b.type)});
+ }
+ return{raw:r,notes:n,envChecksum:envChecksum}}
+
+function ingest(o){
+ var m=migrate(o),raw=m.raw,St=DEF(),errors=[],quarantine=[],warnings=[],seen={},eggKeys={};
+ var sr=cleanObj(SPEC.settings,raw.settings,St);
+ St.settings=sr.rec;sr.errs.forEach(function(e){errors.push('Settings: '+e.msg);var sp=SPEC.settings[e.field];St.settings[e.field]=sp.def});
+ ORDER.forEach(function(c){seen[c]={};
+  raw[c].forEach(function(x,i){
+   var r=cleanObj(SPEC[c],x,St),why=r.errs.length?r.errs[0].msg:'';
+   if(!why&&seen[c][r.rec.id])why='Duplicate id';
+   if(!why&&c==='eggs'){if(r.rec.broken+r.rec.rejected>r.rec.eggs)why='Broken + rejected is more than eggs collected';else if(eggKeys[r.rec.flock+'|'+r.rec.date])why='A second entry for the same flock and date'}
+   if(!why&&c==='moves'){var t=r.rec.type;if((t==='internal'||t==='gift'||t==='loss'||t==='return')&&r.rec.eggs<=0)why='Eggs must be positive for this type'}
+   if(!why&&c==='feedMoves'&&r.rec.kind!=='adjust'&&r.rec.kg<=0)why='Kilograms must be positive for this type';
+   if(why){errors.push(c+' #'+(i+1)+': '+why);quarantine.push({coll:c,reason:why,rec:x&&typeof x==='object'?x:{value:String(x)}});return}
+   seen[c][r.rec.id]=1;if(c==='eggs')eggKeys[r.rec.flock+'|'+r.rec.date]=1;St[c].push(r.rec)})});
+ St.flocks.forEach(function(f){if(!hensNeverNegative(f,St.adjust)){errors.push('Flock "'+f.name+'" would go below zero hens');warnings.push('negative-hens:'+f.id)}});
+ St.audit=raw.audit.filter(function(a){return a&&typeof a==='object'&&typeof a.action==='string'}).slice(-5000);
+ St.quarantine=quarantine.concat(raw.quarantine.filter(function(q){return q&&typeof q==='object'&&q.coll&&q.rec}).slice(0,500));
+ var mt=raw.meta||{};St.meta={backupRequestedAt:isoish(mt.backupRequestedAt),backupConfirmedAt:isoish(mt.backupConfirmedAt),backupChecksum:typeof mt.backupChecksum==='string'?mt.backupChecksum.slice(0,60):''};
+ if(m.envChecksum&&m.envChecksum!==checksum(St)&&!quarantine.length)errors.push('The backup file is damaged or was edited (checksum does not match).');
+ return{state:St,errors:errors,quarantine:quarantine,notes:m.notes,warnings:warnings}}
+function isoish(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(s)?s.slice(0,30):''}
+
+/* ---------- storage ---------- */
+function loadState(){
+ readonly=false;loadError='';conflict=false;storageDown=false;notes=[];
+ var raw=null;
+ try{localStorage.setItem('cooplog.na.t','1');localStorage.removeItem('cooplog.na.t');raw=localStorage.getItem(KEY)}catch(e){storageDown=true}
+ if(raw===null||raw===undefined){S=DEF();return}
+ var rev=0;try{rev=parseInt(localStorage.getItem(KEYREV),10)||0}catch(e){}
+ try{
+  var parsed=JSON.parse(raw),was=parsed&&parsed.schema,res=ingest(parsed);
+  S=res.state;S.rev=rev;notes=res.notes;
+  if(was!==SCHEMA||res.quarantine.length){
+   try{if(localStorage.getItem(KEYORIG)===null)localStorage.setItem(KEYORIG,raw)}catch(e){}
+   if(res.quarantine.length)notes.push(res.quarantine.length+' record(s) did not pass validation and were kept in Quarantine.');
+   var r=save();if(r==='fail'){readonly=true;loadError=raw}}
+ }catch(e){readonly=true;loadError=raw;S=DEF()}}
+function save(){
+ if(readonly)return 'fail';
+ if(storageDown){unsaved=true;return 'mem'}
+ try{
+  var cur=localStorage.getItem(KEY),sr=localStorage.getItem(KEYREV);
+  if(String(S.rev)!==String(parseInt(sr,10)||0)){conflict=true;return 'fail'}
+  S.rev=(S.rev||0)+1;
+  var str=JSON.stringify(S);
+  if(cur!==null)localStorage.setItem(KEYPREV,cur);
+  localStorage.setItem(KEY,str);
+  localStorage.setItem(KEYREV,String(S.rev));
+  if(localStorage.getItem(KEY)!==str)throw new Error('read-back mismatch');
+  unsaved=false;lastSaved=new Date().toISOString();return 'ok'
+ }catch(e){S.rev=Math.max(0,(S.rev||1)-1);unsaved=true;return 'fail'}}
+function commit(fn){
+ var snap=JSON.stringify(S);
+ try{fn()}catch(e){S=JSON.parse(snap);throw e}
+ var r=save();
+ if(r==='fail'){var wasConflict=conflict;S=JSON.parse(snap);
+  throw new VErr(wasConflict?'Another tab or window has saved newer data. Reload this page before making changes. Nothing was changed.':'The browser could not store the data, so this change was NOT saved. Download a backup and free some space.')}
+ return r}
+function audit(St,action,kind,rec,before,after,note){
+ St.audit.push({id:uid(),ts:new Date().toISOString(),action:action,kind:kind,recId:rec&&rec.id?rec.id:0,before:before||null,after:after||null,note:note||''});
+ if(St.audit.length>5000)St.audit.splice(0,St.audit.length-5000)}
+
+/* ---------- flocks ---------- */
+function henAt(f,date,St){St=St||S;var h=f.hens,a=St.adjust,i;for(i=0;i<a.length;i++)if(a[i].flock===f.id&&a[i].date<=date)h+=a[i].delta;return Math.max(0,h)}
+function hensNow(f,St){return henAt(f,'9999-12-31',St)}
+function hensNeverNegative(f,adj){var a=adj.filter(function(x){return x.flock===f.id}).sort(byDateId),h=f.hens,i;for(i=0;i<a.length;i++){h+=a[i].delta;if(h<0)return false}return true}
+
+/* ---------- egg stock ledger ---------- */
+function holdUntil(flockId,date,St){var rel='';St.sprays.forEach(function(s){if(!(s.wd>0))return;if(s.flock!==0&&s.flock!==flockId)return;var end=addDays(s.date,s.wd);if(date>=s.date&&date<=end){var r=addDays(end,1);if(r>rel)rel=r}});return rel}
+function stockEvents(St){
+ var ev=[],s=St.settings;
+ if(s.openingEggs)ev.push({d:s.openingDate||'0000-00-00',q:s.openingEggs});
+ St.eggs.forEach(function(e){var eff=holdUntil(e.flock,e.date,St)||e.date;ev.push({d:eff,q:e.eggs-e.broken-e.rejected})});
+ St.sales.forEach(function(x){ev.push({d:x.date,q:-x.eggs})});
+ St.moves.forEach(function(m){var q=(m.type==='internal'||m.type==='gift'||m.type==='loss')?-m.eggs:m.eggs;ev.push({d:m.date,q:q})});
+ return ev}
+function runMin(ev,from){
+ var a=ev.slice().sort(function(x,y){return x.d<y.d?-1:x.d>y.d?1:0}),bal=0,i=0,min;
+ while(i<a.length&&a[i].d<from){bal+=a[i].q;i++}
+ min=bal;
+ while(i<a.length){var d=a[i].d;while(i<a.length&&a[i].d===d){bal+=a[i].q;i++}if(bal<min)min=bal}
+ return min}
+function balanceAt(ev,date){var t=0;ev.forEach(function(e){if(e.d<=date)t+=e.q});return t}
+function stockSummary(asOf,St){
+ St=St||S;
+ var r={opening:0,collected:0,broken:0,rejected:0,sold:0,internal:0,gifts:0,losses:0,returns:0,adjustments:0,counts:0,withheld:0};
+ if(St.settings.openingEggs&&(St.settings.openingDate||'')<=asOf)r.opening=St.settings.openingEggs;
+ St.eggs.forEach(function(e){if(e.date>asOf)return;r.collected+=e.eggs;r.broken+=e.broken;r.rejected+=e.rejected;var eff=holdUntil(e.flock,e.date,St)||e.date;if(eff>asOf)r.withheld+=e.eggs-e.broken-e.rejected});
+ St.sales.forEach(function(x){if(x.date<=asOf)r.sold+=x.eggs});
+ St.moves.forEach(function(m){if(m.date>asOf)return;if(m.type==='internal')r.internal+=m.eggs;else if(m.type==='gift')r.gifts+=m.eggs;else if(m.type==='loss')r.losses+=m.eggs;else if(m.type==='return')r.returns+=m.eggs;else if(m.type==='adjust')r.adjustments+=m.eggs;else r.counts+=m.eggs});
+ r.closing=r.opening+r.collected-r.broken-r.rejected-r.sold-r.internal-r.gifts-r.losses+r.returns+r.adjustments+r.counts-r.withheld;
+ r.total=r.closing+r.withheld;return r}
+function stockPeriod(from,to,St){var a=stockSummary(addDays(from,-1),St),b=stockSummary(to,St),m={};
+ ['collected','broken','rejected','sold','internal','gifts','losses','returns','adjustments','counts'].forEach(function(k){m[k]=b[k]-a[k]});
+ m.openingClosing=a.closing;m.closing=b.closing;m.withheld=b.withheld;return m}
+function stockFail(St,St2,from,what){
+ var b=runMin(stockEvents(St),from),a=runMin(stockEvents(St2),from);
+ if(a<0&&a<b)fail('This would leave the egg stock '+(-a)+' egg'+(a===-1?'':'s')+' short on or after '+from+'. '+what)}
+
+/* ---------- feed ledger ---------- */
+function feedEvents(tid,St){
+ var ev=[],ft=byId(St.feedTypes,tid);if(!ft)return ev;
+ if(ft.openingKg)ev.push({d:'0000-00-00',q:ft.openingKg,c:r2(ft.openingKg*ft.openingCost)});
+ St.feedBuys.forEach(function(b){if(b.type===tid)ev.push({d:b.date,q:b.bags*b.bagKg,c:b.cost})});
+ St.eggs.forEach(function(e){if(e.feedType===tid&&e.feedKg>0)ev.push({d:e.date,q:-e.feedKg,flock:e.flock})});
+ St.feedMoves.forEach(function(m){if(m.type===tid)ev.push({d:m.date,q:m.kind==='adjust'?m.kg:-m.kg,flock:m.flock,kind:m.kind})});
+ return ev}
+function feedStock(tid,St,asOf){St=St||S;return r3(balanceAt(feedEvents(tid,St),asOf||'9999-12-31'))}
+function r3(n){return Math.round(n*1000)/1000}
+function consumeCost(ev,from,to){
+ var a=ev.slice().sort(function(x,y){return x.d<y.d?-1:x.d>y.d?1:(x.q>0?0:1)-(y.q>0?0:1)}),qty=0,val=0,cost=0,used=0;
+ a.forEach(function(e){if(e.q>0){qty+=e.q;val+=e.c||0}else{var take=-e.q,avg=qty>0?val/qty:0,c=avg*Math.min(take,Math.max(qty,0));val-=c;qty-=take;if(e.d>=from&&e.d<=to){cost+=c;used+=take}}});
+ return{cost:r2(cost),qty:r3(used)}}
+function feedFail(St,St2,tid,from,opts){
+ var b=runMin(feedEvents(tid,St),from),a=runMin(feedEvents(tid,St2),from);
+ if(a<-1e-9&&a<b-1e-9)soft('feedneg','This leaves '+((byId(St2.feedTypes,tid)||{}).name||'this feed')+' stock '+r3(-a)+' kg below zero on or after '+from+'. Check the bag count or deliveries.',opts)}
+function trayEvents(St){var ev=[];St.trayBuys.forEach(function(b){ev.push({d:b.date,q:b.qty,c:b.cost})});St.sales.forEach(function(s){ev.push({d:s.date,q:-s.eggs/St.settings.tray})});return ev}
+function trayStock(St,asOf){St=St||S;return balanceAt(trayEvents(St),asOf||'9999-12-31')}
+
+/* ---------- record rules (business validation on top of the schema) ---------- */
+function withRec(St,coll,rec,old,del){var c=St[coll].filter(function(x){return !old||x.id!==old.id});if(!del)c.push(rec);var o={};o[coll]=c;return Object.assign({},St,o)}
+function notFuture(d,label){if(d>addDays(today(),1))fail((label||'Date')+' cannot be in the future.','date')}
+function flockLife(f,date){if(f.start&&date<f.start)fail('Date is before this flock/cage started ('+f.start+').','date');if(f.status==='closed'&&f.closed&&date>f.closed)fail('This flock/cage was closed on '+f.closed+'.','date')}
+function dupWarn(St,coll,r,old,same,key,what,opts){if(St[coll].some(function(x){return x.id!==(old&&old.id)&&same(x,r)}))soft(key,'An identical '+what+' was already recorded on '+r.date+'.',opts)}
+var RULES={
+ eggs:function(r,St,old,opts){var f=byId(St.flocks,r.flock);notFuture(r.date,'Collection date');
+  if(!old&&f.status==='closed')fail('This flock/cage is closed.','flock');flockLife(f,r.date);
+  if(r.broken+r.rejected>r.eggs)fail('Broken + rejected eggs cannot be more than eggs collected.','broken');
+  if(St.eggs.some(function(e){return e.flock===r.flock&&e.date===r.date&&(!old||e.id!==old.id)}))fail('There is already an entry for this flock/cage on '+r.date+'. Edit that entry instead.','date');
+  var h=henAt(f,r.date,St);if(h<=0&&r.eggs>0)fail('This flock/cage has no hens recorded on '+r.date+'.','eggs');
+  if(r.eggs>h*1.5+2)fail('That is '+r.eggs+' eggs from '+h+' hens, which is not possible. Check the number.','eggs');
+  if(r.eggs>h*1.1+2)soft('manyeggs',r.eggs+' eggs from '+h+' hens is more than one egg per hen.',opts);
+  if(r.feedKg>0&&!r.feedType)fail('Choose the feed type that was used.','feedType');
+  if(r.feedKg>0&&h>0&&r.feedKg/h>0.35)soft('feedhigh',r.feedKg+' kg of feed for '+h+' hens is more than 0.35 kg per hen.',opts);
+  var St2=withRec(St,'eggs',r,old),from=old&&old.date<r.date?old.date:r.date;
+  stockFail(St,St2,from,'Record the missing eggs or remove later sales first.');
+  [r.feedType,old&&old.feedType].forEach(function(t){if(t)feedFail(St,St2,t,from,opts)})},
+ moves:function(r,St,old,opts){notFuture(r.date,'Date');var t=r.type;
+  if((t==='internal'||t==='gift'||t==='loss'||t==='return')&&r.eggs<=0)fail('Eggs must be more than zero.','eggs');
+  if(r.flock){var f=byId(St.flocks,r.flock);flockLife(f,r.date)}
+  stockFail(St,withRec(St,'moves',r,old),old&&old.date<r.date?old.date:r.date,'There are not enough eggs in stock for this.')},
+ sales:function(r,St,old,opts){notFuture(r.date,'Sale date');
+  var St2=withRec(St,'sales',r,old);stockFail(St,St2,old&&old.date<r.date?old.date:r.date,'Only sell eggs that are in stock. Record the collection first, or fix the opening stock.');
+  if(St.sales.some(function(s){return s.id!==(old&&old.id)&&custKey(s.vendor)===custKey(r.vendor)&&s.date===r.date&&s.eggs===r.eggs&&s.price===r.price}))soft('dupsale','A sale to '+r.vendor+' for the same eggs and price already exists on '+r.date+'.',opts)},
+ adjust:function(r,St,old,opts){var f=byId(St.flocks,r.flock);notFuture(r.date,'Date');flockLife(f,r.date);
+  var adj=St.adjust.filter(function(a){return !old||a.id!==old.id}).concat([r]);
+  if(!hensNeverNegative(f,adj))fail('That would take "'+f.name+'" below zero hens at some date.','delta');
+  if(r.delta>0&&r.type!=='added'&&r.type!=='transfer'&&r.type!=='correction')fail('An increase must be "New hens added", "Transfer in" or a correction.','type');
+  if(r.delta<0&&r.type==='added')fail('"New hens added" must be an increase.','type')},
+ feedBuys:function(r,St,old,opts){notFuture(r.date,'Purchase date');dupWarn(St,'feedBuys',r,old,function(x,y){return x.date===y.date&&x.type===y.type&&x.bags===y.bags&&x.bagKg===y.bagKg&&x.cost===y.cost},'dupbuy','feed purchase',opts)},
+ feedMoves:function(r,St,old,opts){notFuture(r.date,'Date');
+  if(r.kind!=='adjust'&&r.kg<=0)fail('Kilograms must be more than zero.','kg');
+  if(r.flock){flockLife(byId(St.flocks,r.flock),r.date)}
+  feedFail(St,withRec(St,'feedMoves',r,old),r.type,old&&old.date<r.date?old.date:r.date,opts)},
+ sprays:function(r,St,old){notFuture(r.date,'Date');if(r.flock)flockLife(byId(St.flocks,r.flock),r.date);
+  if(r.wd>0&&!r.verified&&!r.source)fail('Enter where the withdrawal period came from (product label or vet), or tick "verified".','source');
+  stockFail(St,withRec(St,'sprays',r,old),old&&old.date<r.date?old.date:r.date,'Eggs already sold fall inside this withdrawal period. Check the dates.')},
+ cleans:function(r,St){notFuture(r.date,'Date')},
+ payments:function(r,St,old,opts){notFuture(r.date,'Payment date');
+  if(r.saleId){var s=byId(St.sales,r.saleId);if(custKey(s.vendor)!==custKey(r.customer))fail('That sale belongs to a different customer.','saleId')}
+  dupWarn(St,'payments',r,old,function(x,y){return x.date===y.date&&custKey(x.customer)===custKey(y.customer)&&x.amount===y.amount&&x.kind===y.kind},'duppay','payment',opts);
+  if(r.kind==='in'){var c=customers(withRec(St,'payments',r,old))[custKey(r.customer)];if(c&&c.owed<-0.005)soft('overpay',r.customer+' would have paid '+money(-c.owed)+' more than they owe.',opts)}},
+ credits:function(r,St,old){notFuture(r.date,'Date');if(r.saleId){var s=byId(St.sales,r.saleId);if(custKey(s.vendor)!==custKey(r.customer))fail('That sale belongs to a different customer.','saleId')}},
+ expenses:function(r,St,old,opts){notFuture(r.date,'Date');dupWarn(St,'expenses',r,old,function(x,y){return x.date===y.date&&x.cat===y.cat&&x.amt===y.amt&&x.note===y.note},'dupexp','expense',opts)},
+ trayBuys:function(r,St,old,opts){notFuture(r.date,'Purchase date');dupWarn(St,'trayBuys',r,old,function(x,y){return x.date===y.date&&x.supplier===y.supplier&&x.qty===y.qty&&x.cost===y.cost},'duptray','tray purchase',opts)},
+ feedTypes:function(r,St,old){if(St.feedTypes.some(function(t){return t.id!==(old&&old.id)&&custKey(t.name)===custKey(r.name)}))fail('A feed type with that name already exists.','name')},
+ flocks:function(r,St,old){if(St.flocks.some(function(t){return t.id!==(old&&old.id)&&custKey(t.name)===custKey(r.name)}))fail('A flock or cage with that name already exists.','name');
+  if(r.status==='closed'&&!r.closed)fail('Enter the closing date.','closed')},
+ vendors:function(r,St,old){if(St.vendors.some(function(t){return t.id!==(old&&old.id)&&custKey(t.name)===custKey(r.name)}))fail('A vendor with that name already exists.','name')},
+ suppliers:function(){},
+};
+var DELRULES={
+ eggs:function(old,St){stockFail(St,withRec(St,'eggs',null,old,true),old.date,'Remove the later sales or movements first.');
+  if(old.feedType)feedFail(St,withRec(St,'eggs',null,old,true),old.feedType,old.date,{ok:{}})},
+ moves:function(old,St){stockFail(St,withRec(St,'moves',null,old,true),old.date,'Remove the later sales first.')},
+ sprays:function(old,St){},
+ flocks:function(old,St){var used=['eggs','adjust','moves','feedMoves','sprays','cleans'].some(function(c){return St[c].some(function(x){return x.flock===old.id})});
+  if(used)fail('This flock/cage has records. Close it instead of deleting it, so its history is kept.')},
+ feedTypes:function(old,St){var used=St.feedBuys.some(function(x){return x.type===old.id})||St.feedMoves.some(function(x){return x.type===old.id})||St.eggs.some(function(x){return x.feedType===old.id});
+  if(used)fail('This feed type has records and cannot be deleted.')},
+ sales:function(old,St){var St2=withRec(St,'sales',null,old,true);
+  if(St.payments.some(function(p){return p.saleId===old.id})||St.credits.some(function(p){return p.saleId===old.id}))fail('This sale has payments or credits linked to it. Delete those first.')},
+ credits:function(old,St){},payments:function(){},expenses:function(){},feedBuys:function(old,St){
+  feedFail(St,withRec(St,'feedBuys',null,old,true),old.type,old.date,{ok:{}})},
+ trayBuys:function(){},cleans:function(){},vendors:function(){},suppliers:function(){},feedMoves:function(){},adjust:function(old,St){
+  var f=byId(St.flocks,old.flock);if(f&&!hensNeverNegative(f,St.adjust.filter(function(a){return a.id!==old.id})))fail('Deleting this would take the flock below zero hens.');
+  if(old.xfer&&St.adjust.some(function(a){return a.xfer===old.xfer&&a.id!==old.id}))fail('This is one side of a transfer. Delete the transfer from the Hen count history instead.')}
+};
+function cleanFor(coll,raw,St){var r=cleanObj(SPEC[coll],raw,St);if(r.errs.length)throw new VErr(r.errs[0].msg,r.errs[0].field);return r.rec}
+function opAdd(coll,raw,opts){raw=Object.assign({},raw);if(!raw.id)raw.id=uid();var rec=cleanFor(coll,raw,S);
+ if(S[coll].some(function(x){return x.id===rec.id}))rec.id=uid();
+ RULES[coll](rec,S,null,opts||{});commit(function(){S[coll].push(rec)});return rec}
+function opEdit(coll,id,raw,opts){var old=byId(S[coll],id);if(!old)fail('That record no longer exists.');
+ var rec=cleanFor(coll,Object.assign({},old,raw,{id:id}),S);RULES[coll](rec,S,old,opts||{});
+ commit(function(){S[coll]=S[coll].map(function(x){return x.id===id?rec:x});audit(S,'edit',coll,rec,old,rec)});return rec}
+function cascade(coll,old,St){var out=[];
+ if(coll==='credits'){St.moves.forEach(function(m){if(m.link===old.id)out.push(['moves',m])});St.payments.forEach(function(p){if(p.link===old.id)out.push(['payments',p])})}
+ return out}
+function opDel(coll,id,opts){var old=byId(S[coll],id);if(!old)fail('That record no longer exists.');
+ DELRULES[coll](old,S,opts||{});var extra=cascade(coll,old,S);
+ if(coll==='adjust'&&old.xfer){}
+ commit(function(){S[coll]=S[coll].filter(function(x){return x.id!==id});
+  extra.forEach(function(p){S[p[0]]=S[p[0]].filter(function(x){return x.id!==p[1].id})});
+  audit(S,'delete',coll,old,old,null,extra.length?extra.length+' linked record(s) also deleted':'');
+  extra.forEach(function(p){audit(S,'delete',p[0],p[1],p[1],null,'deleted with '+coll)})})}
+function opRestore(auditId,opts){var a=byId(S.audit,auditId);if(!a||a.action!=='delete'||!a.before)fail('Nothing to restore.');
+ var rec=cleanFor(a.kind,a.before,S);if(S[a.kind].some(function(x){return x.id===rec.id}))fail('That record already exists.');
+ RULES[a.kind](rec,S,null,opts||{});commit(function(){S[a.kind].push(rec);audit(S,'restore',a.kind,rec,null,rec,'restored from change log')});return rec}
+
+/* ---------- compound operations ---------- */
+function opSetFlockStatus(id,status,date){var f=byId(S.flocks,id);if(!f)fail('Flock not found.');
+ if(status==='closed'){if(!isDate(date))fail('Enter the closing date.','date');if(f.start&&date<f.start)fail('Closing date is before the start date.','date')}
+ var rec=Object.assign({},f,{status:status,closed:status==='closed'?date:''});
+ commit(function(){S.flocks=S.flocks.map(function(x){return x.id===id?rec:x});audit(S,'edit','flocks',rec,f,rec,status==='closed'?'closed':'reopened')})}
+function opTransfer(raw){var a=byId(S.flocks,Number(raw.from)),b=byId(S.flocks,Number(raw.to));if(!a||!b)fail('Choose both flocks/cages.','from');if(a.id===b.id)fail('Choose two different flocks/cages.','to');
+ var n=cleanObj({n:{t:'int',req:1,min:1,max:100000}},{n:raw.n},S);if(n.errs.length)fail('Number of hens '+n.errs[0].msg.replace(/^.*? (is|must)/,'$1'),'n');
+ var xf=uid(),d=raw.date,reason=String(raw.reason||'Transfer').slice(0,100);
+ var r1=cleanFor('adjust',{id:uid(),flock:a.id,date:d,delta:-n.rec.n,type:'transfer',reason:reason+' (to '+b.name+')',xfer:xf},S);
+ var r2_=cleanFor('adjust',{id:uid(),flock:b.id,date:d,delta:n.rec.n,type:'transfer',reason:reason+' (from '+a.name+')',xfer:xf},S);
+ var St2=Object.assign({},S,{adjust:S.adjust.concat([r1,r2_])});
+ RULES.adjust(r1,Object.assign({},S,{adjust:S.adjust}),null,{});RULES.adjust(r2_,Object.assign({},S,{adjust:S.adjust.concat([r1])}),null,{});
+ commit(function(){S.adjust.push(r1,r2_)})}
+function opDelTransfer(xfer){var rows=S.adjust.filter(function(a){return a.xfer===xfer});if(!rows.length)fail('Transfer not found.');
+ var rest=S.adjust.filter(function(a){return a.xfer!==xfer});
+ S.flocks.forEach(function(f){if(!hensNeverNegative(f,rest))fail('Deleting this transfer would take "'+f.name+'" below zero hens.')});
+ commit(function(){S.adjust=rest;rows.forEach(function(r){audit(S,'delete','adjust',r,r,null,'transfer deleted')})})}
+function opReturn(raw,opts){var cust=String(raw.customer||'').trim();if(!cust)fail('Choose the customer.','customer');
+ var link=uid(),c=cleanFor('credits',{id:link,date:raw.date,customer:cust,saleId:raw.saleId||0,amount:raw.amount,reason:raw.reason,eggs:raw.eggs||0},S);
+ RULES.credits(c,S,null,opts||{});
+ var mv=c.eggs>0?cleanFor('moves',{id:uid(),date:c.date,type:'return',eggs:c.eggs,note:'Returned by '+cust,link:link},S):null;
+ var pay=raw.refundNow?cleanFor('payments',{id:uid(),date:c.date,customer:cust,saleId:0,amount:c.amount,method:raw.method||'Cash',kind:'refund',note:'Refund: '+(c.reason||'return'),link:link},S):null;
+ commit(function(){S.credits.push(c);if(mv)S.moves.push(mv);if(pay)S.payments.push(pay);audit(S,'adjust','credits',c,null,c,'credit/return recorded')});return c}
+function opStockCount(counted,date,reason){
+ var n=cleanObj({n:{t:'int',req:1,max:MAXEGGS}},{n:counted},S);if(n.errs.length)fail('Counted eggs '+n.errs[0].msg.replace(/^.*? (is|must)/,'$1'),'n');
+ if(!isDate(date))fail('Enter a valid date.','date');notFuture(date,'Count date');
+ var exp=stockSummary(date).closing,d=n.rec.n-exp;
+ if(d===0){return{diff:0,expected:exp}}
+ if(!String(reason||'').trim())fail('Explain the difference of '+(d>0?'+':'')+d+' eggs (expected '+exp+', counted '+n.rec.n+').','reason');
+ var mv=cleanFor('moves',{id:uid(),date:date,type:'count',eggs:d,note:String(reason).trim().slice(0,150)},S);
+ stockFail(S,Object.assign({},S,{moves:S.moves.concat([mv])}),date,'');
+ commit(function(){S.moves.push(mv);audit(S,'stock-correction','moves',mv,{expected:exp},{counted:n.rec.n,diff:d},mv.note)});return{diff:d,expected:exp,rec:mv}}
+function opSetOpening(date,eggs){var r=cleanObj({d:SPEC.settings.openingDate,n:SPEC.settings.openingEggs},{d:date,n:eggs},S);if(r.errs.length)fail(r.errs[0].msg,r.errs[0].field==='d'?'date':'eggs');
+ var test=Object.assign({},S,{settings:Object.assign({},S.settings,{openingDate:r.rec.d,openingEggs:r.rec.n})});
+ stockFail(S,test,'0000-00-00','Choose a different opening stock.');
+ commit(function(){var b=Object.assign({},S.settings);S.settings=test.settings;audit(S,'stock-correction','settings',{id:0},{openingEggs:b.openingEggs,openingDate:b.openingDate},{openingEggs:r.rec.n,openingDate:r.rec.d},'opening stock set')})}
+function opSettings(raw){var r=cleanObj(SPEC.settings,Object.assign({},S.settings,raw),S);if(r.errs.length)throw new VErr(r.errs[0].msg,r.errs[0].field);
+ commit(function(){var b=Object.assign({},S.settings);S.settings=Object.assign({},r.rec,{openingEggs:b.openingEggs,openingDate:b.openingDate});audit(S,'edit','settings',{id:0},b,S.settings)})}
+
+/* ---------- money & customers ---------- */
+function money(n){return 'N$ '+(n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function customers(St,to){St=St||S;to=to||'9999-12-31';var m={};
+ function g(n){var k=custKey(n);return m[k]||(m[k]={name:n,sales:0,paid:0,refunded:0,credits:0,eggs:0,owed:0})}
+ St.sales.forEach(function(s){if(s.date>to)return;var c=g(s.vendor);c.sales=r2(c.sales+saleTotal(s));c.eggs+=s.eggs});
+ St.payments.forEach(function(p){if(p.date>to)return;var c=g(p.customer);if(p.kind==='in')c.paid=r2(c.paid+p.amount);else c.refunded=r2(c.refunded+p.amount)});
+ St.credits.forEach(function(p){if(p.date>to)return;var c=g(p.customer);c.credits=r2(c.credits+p.amount)});
+ Object.keys(m).forEach(function(k){var c=m[k];c.owed=r2(c.sales-c.credits-c.paid+c.refunded)});return m}
+function saleStatus(St){St=St||S;var out={},by={};
+ St.sales.slice().sort(byDateId).forEach(function(s){(by[custKey(s.vendor)]=by[custKey(s.vendor)]||[]).push(s)});
+ var cs=customers(St);
+ Object.keys(by).forEach(function(k){var left=r2(cs[k].paid+cs[k].credits-cs[k].refunded);by[k].forEach(function(s){var t=saleTotal(s),p=Math.max(0,Math.min(t,left));left=r2(left-p);out[s.id]={paid:r2(p),due:r2(t-p),total:t}})});
+ return out}
+function statement(cust,from,to,St){St=St||S;from=from||'0000-00-00';to=to||'9999-12-31';var k=custKey(cust),rows=[],opening=0;
+ function add(d,id,desc,debit,credit){if(d<from){opening=r2(opening+debit-credit)}else if(d<=to)rows.push({date:d,id:id,desc:desc,debit:debit,credit:credit})}
+ St.sales.forEach(function(s){if(custKey(s.vendor)===k)add(s.date,s.id,s.eggs+' eggs @ '+money(s.price),saleTotal(s),0)});
+ St.payments.forEach(function(p){if(custKey(p.customer)===k)p.kind==='in'?add(p.date,p.id,'Payment ('+p.method+')',0,p.amount):add(p.date,p.id,'Refund paid',p.amount,0)});
+ St.credits.forEach(function(c){if(custKey(c.customer)===k)add(c.date,c.id,'Credit: '+(c.reason||'return'),0,c.amount)});
+ rows.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:a.id-b.id});
+ var bal=opening;rows.forEach(function(r){bal=r2(bal+r.debit-r.credit);r.balance=bal});return{opening:opening,rows:rows,closing:bal}}
+
+/* ---------- reports ---------- */
+function periodRange(kind,from,to){var t=today();
+ switch(kind){case 'today':return{from:t,to:t};case 'week':return{from:weekStart(t),to:t};case 'month':return{from:t.slice(0,8)+'01',to:t};case 'year':return{from:t.slice(0,4)+'-01-01',to:t};
+ case '7':return{from:addDays(t,-6),to:t};case '30':return{from:addDays(t,-29),to:t};case '90':return{from:addDays(t,-89),to:t};
+ case 'custom':return{from:isDate(from)?from:'0000-00-00',to:isDate(to)?to:t};default:return{from:'0000-00-00',to:'9999-12-31'}}}
+function fin(from,to,St){St=St||S;from=from||'0000-00-00';to=to||'9999-12-31';
+ var inr=function(x){return x.date>=from&&x.date<=to};
+ var sales=St.sales.filter(inr),eg=St.eggs.filter(inr);
+ var f={sales:sales,salesValue:sumM(sales,saleTotal),credits:sumM(St.credits.filter(inr),function(x){return x.amount})};
+ f.revenue=r2(f.salesValue-f.credits);
+ f.received=sumM(St.payments.filter(function(p){return inr(p)&&p.kind==='in'}),function(x){return x.amount});
+ f.refunded=sumM(St.payments.filter(function(p){return inr(p)&&p.kind==='refund'}),function(x){return x.amount});
+ f.cashIn=r2(f.received-f.refunded);
+ f.feedBought=sumM(St.feedBuys.filter(inr),function(x){return x.cost});f.trayBought=sumM(St.trayBuys.filter(inr),function(x){return x.cost});
+ f.spray=sumM(St.sprays.filter(inr),function(x){return x.cost});f.expenses=sumM(St.expenses.filter(inr),function(x){return x.amt});
+ f.cashOut=r2(f.feedBought+f.trayBought+f.spray+f.expenses);f.cashFlow=r2(f.cashIn-f.cashOut);
+ var fc=0;St.feedTypes.forEach(function(t){fc+=cents(consumeCost(feedEvents(t.id,St),from,to).cost)});f.feedConsumed=fc/100;
+ f.trayConsumed=consumeCost(trayEvents(St),from,to).cost;
+ f.estCosts=r2(f.feedConsumed+f.trayConsumed+f.spray+f.expenses);f.estProfit=r2(f.revenue-f.estCosts);
+ f.laid=sumN(eg,function(e){return e.eggs});f.broken=sumN(eg,function(e){return e.broken});f.rejected=sumN(eg,function(e){return e.rejected});
+ f.sold=sumN(sales,function(s){return s.eggs});var good=f.laid-f.broken-f.rejected;f.costEgg=good>0?r2(f.estCosts/good):0;f.avgPrice=f.sold?r2(f.salesValue/f.sold):0;
+ var cust=customers(St,to);f.owed=r2(sumN(Object.keys(cust).map(function(k){return cust[k]}),function(c){return c.owed>0?c.owed:0}));
+ return f}
+function production(from,to,St){St=St||S;from=from||'0000-00-00';to=to||'9999-12-31';var out=[];
+ St.flocks.forEach(function(f){
+  var L=St.eggs.filter(function(e){return e.flock===f.id&&e.date>=from&&e.date<=to});
+  var uses=St.feedMoves.filter(function(m){return m.flock===f.id&&m.kind==='use'&&m.date>=from&&m.date<=to});
+  var adj=St.adjust.filter(function(a){return a.flock===f.id&&a.date>=from&&a.date<=to});
+  if(!L.length&&!uses.length&&!adj.length&&f.status==='closed')return;
+  var eggs=0,hd=0,perHen=0,feed=0,fdays={};
+  L.forEach(function(e){var h=henAt(f,e.date,St);eggs+=e.eggs;hd+=h;if(h)perHen+=e.eggs/h;if(e.feedKg>0){feed+=e.feedKg;fdays[e.date]=1}});
+  uses.forEach(function(m){feed+=m.kg;fdays[m.date]=1});
+  var bd=0;Object.keys(fdays).forEach(function(d){bd+=henAt(f,d,St)});
+  var deaths=0,added=0;adj.forEach(function(a){if(a.type==='death')deaths-=a.delta;if(a.type==='added')added+=a.delta});
+  var start=from==='0000-00-00'?f.hens:henAt(f,addDays(from,-1),St);
+  out.push({id:f.id,name:f.name,kind:f.kind,status:f.status,hens:hensNow(f,St),entries:L.length,eggs:eggs,perHen:perHen,layRate:hd?eggs/hd*100:null,feedKg:feed,feedPerBird:bd?feed/bd:null,deaths:deaths,mortality:(start+added)>0?deaths/(start+added)*100:null})});
+ return out}
+function bucketKey(g,d){return g==='week'?weekStart(d):g==='month'?d.slice(0,7):g==='year'?d.slice(0,4):d}
+function buckets(g,from,to,St){St=St||S;from=from||'0000-00-00';to=to||'9999-12-31';var m={};
+ function b(d){var k=bucketKey(g,d);return m[k]||(m[k]={key:k,laid:0,sold:0,sales:0,cashIn:0,cashOut:0})}
+ function inr(x){return x.date>=from&&x.date<=to}
+ St.eggs.filter(inr).forEach(function(e){b(e.date).laid+=e.eggs});
+ St.sales.filter(inr).forEach(function(s){var x=b(s.date);x.sold+=s.eggs;x.sales=r2(x.sales+saleTotal(s))});
+ St.payments.filter(inr).forEach(function(p){var x=b(p.date);x.cashIn=r2(x.cashIn+(p.kind==='in'?p.amount:-p.amount))});
+ [['feedBuys','cost'],['trayBuys','cost'],['sprays','cost'],['expenses','amt']].forEach(function(p){St[p[0]].filter(inr).forEach(function(r){var x=b(r.date);x.cashOut=r2(x.cashOut+r[p[1]])})});
+ return Object.keys(m).sort().reverse().map(function(k){return m[k]})}
+function transactions(St){St=St||S;var rows=[];
+ function t(date,kind,coll,id,title,detail,amount,qty){rows.push({date:date,kind:kind,coll:coll,id:id,title:title,detail:detail||'',amount:amount==null?null:amount,qty:qty==null?null:qty})}
+ function fname(id){var f=byId(St.flocks,id);return id?(f?f.name:'(removed)'):'All flocks'}
+ St.eggs.forEach(function(e){t(e.date,'Eggs','eggs',e.id,e.eggs+' eggs · '+fname(e.flock),e.broken+' broken, '+e.rejected+' rejected, '+e.grade+(e.feedKg?', feed '+e.feedKg+' kg':''),null,e.eggs)});
+ St.sales.forEach(function(s){t(s.date,'Sale','sales',s.id,s.vendor+' · '+s.eggs+' eggs',(s.place?s.place+' · ':'')+money(s.price)+'/egg'+(s.note?' · '+s.note:''),saleTotal(s),s.eggs)});
+ St.payments.forEach(function(p){t(p.date,p.kind==='in'?'Payment in':'Refund paid','payments',p.id,p.customer+' · '+p.method,p.note,p.kind==='in'?p.amount:-p.amount)});
+ St.credits.forEach(function(c){t(c.date,'Credit','credits',c.id,c.customer+' · credit',c.reason,-c.amount,c.eggs||null)});
+ St.expenses.forEach(function(x){t(x.date,'Expense','expenses',x.id,x.cat,x.note,x.amt)});
+ St.feedBuys.forEach(function(b){var ft=byId(St.feedTypes,b.type);t(b.date,'Feed bought','feedBuys',b.id,(ft?ft.name:'Feed')+' · '+b.bags+' × '+b.bagKg+' kg',b.where,b.cost)});
+ St.trayBuys.forEach(function(b){t(b.date,'Trays bought','trayBuys',b.id,b.qty+' trays · '+b.supplier,'',b.cost)});
+ St.sprays.forEach(function(s){t(s.date,'Spray / medicine','sprays',s.id,s.product+' · '+fname(s.flock),s.kind+(s.wd?' · withdrawal '+s.wd+' d':''),s.cost||null)});
+ St.moves.forEach(function(m){t(m.date,'Egg movement','moves',m.id,m.type+' · '+m.eggs+' eggs',m.note,null,m.eggs)});
+ St.feedMoves.forEach(function(m){var ft=byId(St.feedTypes,m.type);t(m.date,'Feed '+m.kind,'feedMoves',m.id,(ft?ft.name:'Feed')+' · '+m.kg+' kg',fname(m.flock)+(m.note?' · '+m.note:''))});
+ St.adjust.forEach(function(a){t(a.date,'Hens '+a.type,'adjust',a.id,(a.delta>0?'+':'')+a.delta+' hens · '+fname(a.flock),a.reason)});
+ St.cleans.forEach(function(c){t(c.date,'Cleaning','cleans',c.id,c.task+' · '+fname(c.flock))});
+ return rows.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:b.id-a.id})}
+var DRILL={salesValue:['Sale'],credits:['Credit'],received:['Payment in'],refunded:['Refund paid'],feedBought:['Feed bought'],trayBought:['Trays bought'],spray:['Spray / medicine'],expenses:['Expense']};
+function drill(key,from,to,St){var kinds=DRILL[key]||[];return transactions(St).filter(function(r){return kinds.indexOf(r.kind)>=0&&r.date>=from&&r.date<=to})}
+
+/* ---------- alerts ---------- */
+function alerts(St){St=St||S;var t=today(),o=[];
+ function fname(id){var f=byId(St.flocks,id);return id?(f?f.name:'removed flock'):'all flocks'}
+ function lastClean(fid){var d=St.cleans.filter(function(c){return c.flock===0||c.flock===fid}).map(function(c){return c.date}).sort().pop();return d||''}
+ var st=stockSummary(t,St);
+ if(st.closing<0)o.push({lvl:'bad',text:'Egg stock shows '+st.closing+'. Opening stock or some collections are missing. Set the opening stock on the Stock tab.',go:'stock'});
+ St.flocks.filter(function(f){return f.status==='active'}).forEach(function(f){
+  var l=lastClean(f.id),ev=St.settings.clean;
+  if(!l)o.push({lvl:'bad',text:f.name+': no cleaning logged yet',go:'care'});
+  else{var due=diff(l,t)-ev;if(due>0)o.push({lvl:'bad',text:'Cleaning overdue: '+f.name+' ('+due+' day'+(due>1?'s':'')+' late)',go:'care'});else if(due===0)o.push({lvl:'bad',text:'Clean today: '+f.name,go:'care'});else if(due>=-2)o.push({lvl:'warn',text:'Cleaning due in '+(-due)+' day'+(due<-1?'s':'')+': '+f.name,go:'care'})}
+  var rec=rateOf(f,addDays(t,-6),t,St),base=rateOf(f,addDays(t,-34),addDays(t,-7),St);
+  if(rec.n>=3&&rec.rate<St.settings.lowRatio)o.push({lvl:'warn',text:'Low production: '+f.name+' laid at '+Math.round(rec.rate)+'% over the last week (alert level '+St.settings.lowRatio+'%).',go:'log'});
+  else if(rec.n>=3&&base.n>=7&&rec.rate<base.rate*0.85)o.push({lvl:'warn',text:'Production dropped: '+f.name+' is at '+Math.round(rec.rate)+'% against '+Math.round(base.rate)+'% in the previous month.',go:'log'});
+  var y=addDays(t,-1);if(St.eggs.some(function(e){return e.flock===f.id&&e.date<y})&&!St.eggs.some(function(e){return e.flock===f.id&&e.date>=y}))o.push({lvl:'info',text:'No egg entry yet for '+f.name+' since '+addDays(t,-1),go:'log'})});
+ St.sprays.forEach(function(s){
+  if(s.wd>0&&addDays(s.date,s.wd)>=t)o.push({lvl:'bad',text:'Eggs from '+fname(s.flock)+' are on hold until '+addDays(s.date,s.wd)+' ('+s.product+' withdrawal). They are not counted as sellable stock.',go:'care'});
+  if(s.again>0){var nx=addDays(s.date,s.again),later=St.sprays.some(function(x){return x.id!==s.id&&x.product===s.product&&x.flock===s.flock&&x.date>s.date});if(!later&&nx<=addDays(t,3))o.push({lvl:nx<t?'bad':'warn',text:(nx<t?'Spray overdue: ':'Spray due '+nx+': ')+s.product+' ('+fname(s.flock)+')',go:'care'})}});
+ St.vendors.filter(function(v){return v.remind&&v.days.length}).forEach(function(v){for(var i=0;i<7;i++){var d=addDays(t,i);if(v.days.indexOf(dow(d))>-1){o.push({lvl:i===0?'warn':'info',text:(i===0?'TODAY: ':i===1?'Tomorrow: ':DAYS[dow(d)]+': ')+'sell/deliver eggs to '+v.name+(v.place?' ('+v.place+')':''),go:'sales'});break}}});
+ if(St.trayBuys.length&&trayStock(St)<St.settings.trayLow)o.push({lvl:'warn',text:'Egg trays low ('+Math.round(Math.max(0,trayStock(St))*10)/10+' left). Buy more.',go:'supplies'});
+ St.feedTypes.forEach(function(ft){var left=feedStock(ft.id,St),lvl=ft.reorderKg||St.settings.feedLow,ev=feedEvents(ft.id,St),from=addDays(t,-13),use=0;
+  ev.forEach(function(e){if(e.q<0&&e.d>=from&&e.d<=t)use-=e.q});var daily=use/14;
+  if(left<0)o.push({lvl:'bad',text:'Feed stock is negative: '+ft.name+' ('+left+' kg). Check deliveries and usage.',go:'supplies'});
+  else if(ev.length&&(left<=lvl||(daily>0&&left/daily<St.settings.reorderDays)))o.push({lvl:'warn',text:'Reorder feed: '+ft.name+' has '+left+' kg'+(daily>0?' (about '+Math.floor(left/daily)+' days)':'')+' left.',go:'supplies'})});
+ var cut=addDays(t,-30);St.moves.forEach(function(m){if(m.type==='count'&&m.date>=cut&&m.eggs!==0)o.push({lvl:'warn',text:'Unexplained egg stock difference of '+(m.eggs>0?'+':'')+m.eggs+' on '+m.date+(m.note?' ('+m.note+')':''),go:'stock'})});
+ var cs=customers(St);Object.keys(cs).forEach(function(k){if(cs[k].owed>0.005){var oldest='';St.sales.forEach(function(s){if(custKey(s.vendor)===k&&(!oldest||s.date<oldest))oldest=s.date});if(oldest&&diff(oldest,t)>30)o.push({lvl:'info',text:cs[k].name+' owes '+money(cs[k].owed)+' (oldest sale '+oldest+')',go:'money'})}});
+ if(St.quarantine.length)o.push({lvl:'warn',text:St.quarantine.length+' record(s) failed validation and are in Quarantine (Setup).',go:'setup'});
+ var rank={bad:0,warn:1,info:2};return o.sort(function(a,b){return rank[a.lvl]-rank[b.lvl]})}
+function rateOf(f,from,to,St){var n=0,eggs=0,hd=0;St.eggs.forEach(function(e){if(e.flock===f.id&&e.date>=from&&e.date<=to){var h=henAt(f,e.date,St);if(h){n++;eggs+=e.eggs;hd+=h}}});return{n:n,rate:hd?eggs/hd*100:0}}
+
+/* ---------- backup, restore points ---------- */
+function previewImport(text){
+ var o;try{o=JSON.parse(text)}catch(e){return{ok:false,fatal:'The file is not valid JSON, so it cannot be a CoopLog backup.',errors:[]}}
+ var res;try{res=ingest(o)}catch(e){return{ok:false,fatal:e.message,errors:[]}}
+ var st=res.state,counts={};COLLS.forEach(function(c){counts[c]=st[c].length});
+ return{ok:res.errors.length===0,errors:res.errors,notes:res.notes,quarantine:res.quarantine,state:st,counts:counts,fatal:''}}
+function listRestorePoints(){var k=[];try{for(var i=0;i<localStorage.length;i++){var n=localStorage.key(i);if(n&&n.indexOf(RPPREFIX)===0)k.push(n)}}catch(e){}return k.sort().reverse()}
+function createRestorePoint(){
+ var key=RPPREFIX+Date.now(),str=JSON.stringify(makeEnvelope(S));
+ try{localStorage.setItem(key,str);if(localStorage.getItem(key)!==str)throw 0;listRestorePoints().slice(3).forEach(function(k){localStorage.removeItem(k)});return key}
+ catch(e){try{localStorage.removeItem(key)}catch(x){}return ''}}
+function replaceState(newSt,note,kind){
+ var snap=JSON.stringify(S),rev=S.rev,meta=S.meta;
+ newSt.rev=rev;newSt.meta=Object.assign({},newSt.meta,{backupRequestedAt:meta.backupRequestedAt,backupConfirmedAt:meta.backupConfirmedAt,backupChecksum:meta.backupChecksum});
+ S=newSt;audit(S,kind,'all',{id:0},null,null,note);
+ var r=save();if(r==='fail'){var c=conflict;S=JSON.parse(snap);throw new VErr(c?'Another tab has saved newer data. Reload first. Nothing was changed.':'The browser could not store the new data. Nothing was changed.')}}
+function applyImport(pv,partial){
+ if(!pv||(!pv.ok&&!partial)||!pv.state)throw new VErr('The file did not pass validation, so it was not imported. Your current data is unchanged.');
+ var rp=createRestorePoint();if(!rp)throw new VErr('Could not make a safety copy of your current data, so nothing was replaced. Download a backup first.');
+ replaceState(pv.state,'imported '+Object.keys(pv.counts).reduce(function(t,k){return t+pv.counts[k]},0)+' records'+(partial&&pv.errors.length?' ('+pv.errors.length+' problem records quarantined)':''),'import');return rp}
+function undoRestore(){var rps=listRestorePoints();if(!rps.length)throw new VErr('No restore point available.');
+ var txt;try{txt=localStorage.getItem(rps[0])}catch(e){}
+ var pv=previewImport(txt||'');if(!pv.state)throw new VErr('The restore point could not be read.');
+ var rp=createRestorePoint();if(!rp)throw new VErr('Could not make a safety copy first.');
+ replaceState(pv.state,'restored previous data','restore');try{localStorage.removeItem(rps[0])}catch(e){}}
+function verifyBackupText(text){var pv=previewImport(text);if(pv.fatal)return{ok:false,msg:pv.fatal};
+ if(!pv.ok)return{ok:false,msg:'The file has '+pv.errors.length+' invalid record(s): '+pv.errors.slice(0,3).join('; ')};
+ var o=JSON.parse(text),same=checksum(pv.state)===checksum(S);
+ return{ok:true,same:same,msg:same?'This file is a valid, complete copy of your current data.':'This file is valid but does not match your current data (it is older, or data changed since).'}}
+function markBackup(confirmed){S.meta.backupRequestedAt=new Date().toISOString();S.meta.backupChecksum=checksum(S);if(confirmed)S.meta.backupConfirmedAt=S.meta.backupRequestedAt;save()}
+
+/* ---------- sample data (valid by construction) ---------- */
+function sampleRaw(){
+ var t=today(),d={schema:SCHEMA,settings:{farm:'Sample Farm, Windhoek',price:3.5,tray:30,clean:14,trayLow:2,feedLow:25,reorderDays:7,lowRatio:70,openingEggs:300,openingDate:addDays(t,-60)},audit:[]},i,k=0;
+ d.flocks=[{id:1,name:'Cage 1',kind:'Cage',hens:60,breed:'Lohmann Brown',start:addDays(t,-120)},{id:2,name:'Free-range house',kind:'Flock',hens:40,breed:'Boschveld',start:addDays(t,-90)}];
+ d.adjust=[{id:11,flock:1,date:addDays(t,-40),delta:-2,type:'death',reason:'Died'},{id:12,flock:2,date:addDays(t,-15),delta:10,type:'added',reason:'New hens added'}];
+ d.feedTypes=[{id:21,name:'Layer mash',bagKg:50,note:'',openingKg:100,openingCost:8,reorderKg:60},{id:22,name:'Grower pellets',bagKg:50,note:'for new hens',openingKg:0,openingCost:0,reorderKg:0}];
+ d.eggs=[];for(i=45;i>=0;i--){var dt=addDays(t,-i);k++;d.eggs.push({id:1000+k,date:dt,flock:1,eggs:44+(k*7%9),broken:k%4,rejected:k%5===0?1:0,grade:'Mixed',feedType:21,feedKg:6.5});d.eggs.push({id:2000+k,date:dt,flock:2,eggs:38+(k*5%8),broken:k%3?0:1,rejected:0,grade:'Large',feedType:21,feedKg:4.5})}
+ d.feedBuys=[{id:31,date:addDays(t,-44),type:21,bags:6,bagKg:50,cost:2400,where:'Agra Windhoek'},{id:32,date:addDays(t,-12),type:21,bags:6,bagKg:50,cost:2520,where:'Feedmaster'},{id:33,date:addDays(t,-20),type:22,bags:2,bagKg:50,cost:900,where:'Agra Windhoek'}];
+ d.vendors=[{id:41,name:'Shoprite Okuryangava',place:'Windhoek',days:[2,5],price:3.8,remind:true},{id:42,name:'Katutura Market',place:'Katutura',days:[6],price:3.5,remind:true},{id:43,name:'Mama Ndapewa',place:'Wanaheda',days:[1,4],price:3.6,remind:false}];
+ d.sales=[];d.payments=[];for(i=0;i<8;i++){var sd=addDays(t,-i*4-1),v=d.vendors[i%3];d.sales.push({id:5000+i,date:sd,vendor:v.name,place:v.place,eggs:30*(3+i%4),price:v.price,note:''});if(i>1)d.payments.push({id:5100+i,date:sd,customer:v.name,saleId:5000+i,amount:r2(30*(3+i%4)*v.price),method:i%2?'Cash':'Bank transfer',kind:'in',note:''})}
+ d.suppliers=[{id:61,name:'Packaging Hub',place:'Windhoek Industrial',note:'Open Mon-Fri'},{id:62,name:'Pick n Pay wholesale',place:'Windhoek',note:'Bulk tray packs'}];
+ d.trayBuys=[{id:71,date:addDays(t,-30),supplier:'Packaging Hub',qty:40,cost:480},{id:72,date:addDays(t,-10),supplier:'Pick n Pay wholesale',qty:10,cost:140}];
+ d.sprays=[{id:81,date:addDays(t,-6),product:'Red mite spray',kind:'Mite / lice spray',flock:2,cost:180,wd:0,again:14,notes:'sprayed perches',verified:true,source:'product label'},{id:82,date:addDays(t,-2),product:'Ivermectin dewormer',kind:'Dewormer',flock:1,cost:120,wd:7,again:0,notes:'in drinking water',verified:true,source:'vet'}];
+ d.cleans=[{id:91,flock:1,date:addDays(t,-13),task:'Cage trays emptied'},{id:92,flock:2,date:addDays(t,-5),task:'Coop cleaned'}];
+ d.expenses=[{id:95,date:addDays(t,-20),cat:'Water & electricity',amt:350,note:'',method:'Bank transfer'},{id:96,date:addDays(t,-9),cat:'Labour',amt:600,note:'helper',method:'Cash'}];
+ d.moves=[{id:97,date:addDays(t,-8),type:'internal',eggs:12,note:'family use',flock:0,link:0}];
+ return d}
+
+/* CoopLog Namibia UI. Reads/writes data only through the core (opAdd, opEdit, opDel, ...). */
+var tab='home',EDIT={k:'',id:0},RP={kind:'30',from:'',to:'',gran:'week'},DR='',HF={q:'',kind:'',from:'',to:'',n:60},ST={asOf:''},STM={cust:'',from:'',to:''},PV=null,NOTICE='',VMSG='';
+var used={},busyN={},tokN=0,H={};
+var TABS=[['home','Home'],['log','Eggs'],['stock','Stock'],['sales','Sales'],['money','Money'],['supplies','Supplies'],['care','Care'],['flocks','Flocks'],['reports','Reports'],['history','History'],['setup','Setup']];
+
+/* ---------- escaping-by-default helpers ---------- */
+function $(id){return document.getElementById(id)}
+function T(x){return x&&x.h!==undefined?x.h:esc(x)}
+function raw(h){return{h:h}}
+function bold(x,cls){return raw('<b'+(cls?' class="'+cls+'"':'')+'>'+esc(x)+'</b>')}
+function item(title,sub,right,acts){return '<div class="item"><div><b>'+T(title)+'</b><small>'+T(sub)+'</small></div><div class="r">'+T(right||'')+(acts||'')+'</div></div>'}
+function tbl(h,rows){return '<div class="tw"><table><thead><tr>'+h.map(function(x){return '<th scope="col">'+esc(x)+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+T(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>'}
+function none(t){return '<div class="empty">'+esc(t)+'</div>'}
+function btn(label,fn,cls){return '<button type="button" class="small '+(cls||'')+'" onclick="'+fn+'">'+esc(label)+'</button>'}
+function acts(k,id,edit){return (edit?btn('Edit','startEdit(\''+k+'\','+id+')','plain'):'')+btn('Delete','del(\''+k+'\','+id+')')}
+function ev(k){return EDIT.k===k?byId(S[k],EDIT.id):null}
+function fname(id){return id?(byId(S.flocks,id)||{name:'(removed)'}).name:'All flocks / cages'}
+function ftname(id){return id?(byId(S.feedTypes,id)||{name:'(removed)'}).name:'—'}
+function F(p,f,label,o){o=o||{};var id=p+'_'+f;return '<label for="'+id+'">'+esc(label)+'</label><input id="'+id+'" type="'+(o.type||'text')+'"'+(o.attr?' '+o.attr:'')+' value="'+esc(o.val==null?'':o.val)+'"'+(o.list?' list="'+o.list+'"':'')+' autocomplete="off"'+(o.max?' max="'+o.max+'"':'')+'>'}
+function DT(p,f,label,val){return F(p,f,label,{type:'date',val:val||today(),max:today()})}
+function NUM(p,f,label,o){o=o||{};return F(p,f,label,{type:'text',attr:'inputmode="'+(o.dec?'decimal':'numeric')+'"'+(o.attr?' '+o.attr:''),val:o.val==null?'':o.val})}
+function SEL(p,f,label,list,val,extra){var id=p+'_'+f;return '<label for="'+id+'">'+esc(label)+'</label><select id="'+id+'"'+(extra?' '+extra:'')+'>'+list.map(function(x){return '<option value="'+esc(x[0])+'"'+(String(x[0])===String(val)?' selected':'')+'>'+esc(x[1])+'</option>'}).join('')+'</select>'}
+function G(p,f){var e=$(p+'_'+f);return e?e.value:''}
+function FORM(name,p,body,label,extra){return '<form novalidate data-tok="'+name+':'+(++tokN)+'" onsubmit="return sub(event,\''+name+'\',\''+p+'\')">'+body+'<div class="ferr" role="alert"></div><button type="submit">'+esc(label)+'</button>'+(extra||'')+'</form>'}
+function editBar(k){return EDIT.k===k?'<button type="button" class="alt" onclick="cancelEdit()">Cancel editing</button>':''}
+function activeFlocks(){return S.flocks.filter(function(f){return f.status==='active'})}
+function flockOpts(all,onlyActive){var l=(onlyActive?activeFlocks():S.flocks).map(function(f){return [f.id,f.name+' ('+f.kind+')'+(f.status==='closed'?' – closed':'')]});if(all)l.unshift([0,'All flocks / cages']);return l}
 function places(){var p={};S.vendors.forEach(function(v){if(v.place)p[v.place]=1});S.sales.forEach(function(v){if(v.place)p[v.place]=1});S.feedBuys.forEach(function(v){if(v.where)p[v.where]=1});S.suppliers.forEach(function(v){if(v.place)p[v.place]=1});return '<datalist id="places">'+Object.keys(p).map(function(x){return '<option value="'+esc(x)+'">'}).join('')+'</datalist>'}
-function del(k,id){if(!confirm('Delete this record?'))return;S[k]=S[k].filter(function(x){return x.id!==id});save();render()}
-function go(t){tab=t;render(true)}
+function needFlock(){return '<div class="empty">Add a flock or cage first.<button type="button" onclick="go(\'flocks\')">Add a flock / cage</button></div>'}
+function r1(n){return String(Math.round(n*10)/10)}
+function pct(n){return n==null?'–':r1(n)+'%'}
+function nice(s){return new Date(s+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
 
-/* ---- calculations ---- */
-function fin(fromD){
- var ok=function(d){return !fromD||d>=fromD};
- var sales=S.sales.filter(function(s){return ok(s.date)}),eg=S.eggs.filter(function(e){return ok(e.date)});
- var inc=sales.reduce(function(a,s){return a+s.eggs*s.price},0);
- var feed=sumBy(S.feedBuys.filter(function(x){return ok(x.date)}),'cost'),spray=sumBy(S.sprays.filter(function(x){return ok(x.date)}),'cost'),tray=sumBy(S.trayBuys.filter(function(x){return ok(x.date)}),'cost');
- var laid=sumBy(eg,'eggs'),broken=sumBy(eg,'broken'),sold=sumBy(sales,'eggs'),exp=feed+spray+tray;
- return{inc:inc,feed:feed,spray:spray,tray:tray,exp:exp,profit:inc-exp,laid:laid,broken:broken,sold:sold,sales:sales,eg:eg,costEgg:laid-broken>0?exp/(laid-broken):0,avgPrice:sold?inc/sold:0}
-}
-function perHen(entries){ // sum of eggs/hens on each day = eggs per hen
- var t=0;entries.forEach(function(e){var f=byId(S.flocks,e.flock);var h=f?henAt(f,e.date):0;if(h)t+=e.eggs/h});return t}
-function trayStock(){return sumBy(S.trayBuys,'qty')-sumBy(S.sales,'eggs')/S.settings.tray}
-function feedStock(tid){
- var bought=S.feedBuys.filter(function(b){return b.type===tid}).reduce(function(t,b){return t+b.bags*b.bagKg},0);
- var used=sumBy(S.eggs.filter(function(e){return e.feedType===tid}),'feedKg');return{bought:bought,used:used,left:bought-used}}
-function holds(){var t=today();return S.sprays.filter(function(s){return s.wd>0&&addDays(s.date,s.wd)>=t}).map(function(s){return s.product+' ('+flockName(s.flock)+') until '+addDays(s.date,s.wd)})}
-function cheapestTray(){var best=null;S.trayBuys.forEach(function(b){if(!b.qty)return;var p=b.cost/b.qty;if(!best||p<best.p)best={p:p,s:b.supplier}});return best}
+/* ---------- submit pipeline: one place for double-tap guard, validation messages, soft confirmations ---------- */
+function sub(ev_,name,prefix){
+ ev_.preventDefault();var f=ev_.target,tok=f.getAttribute('data-tok');
+ if(busyN[name]||used[tok])return false;
+ var b=f.querySelector('button[type=submit]');if(b)b.disabled=true;
+ var ok={},fin_=function(){if(b)b.disabled=false};
+ for(var tries=0;tries<8;tries++){
+  try{var r=H[name](ok);if(r!==false){used[tok]=1;busyN[name]=true;setTimeout(function(){delete busyN[name]},600);NOTICE='Saved ✓';render();flash()}else fin_();return false}
+  catch(e){
+   if(e&&e.soft){if(confirm(e.message+'\n\nSave anyway?')){ok[e.soft]=true;continue}fin_();return false}
+   if(e&&e.isV){fin_();showErr(f,e,prefix);refreshBanners();return false}
+   fin_();showErr(f,{message:'Something went wrong: '+(e&&e.message||e)},prefix);return false}}
+ fin_();return false}
+function refreshBanners(){var e=$('bn');if(e)e.innerHTML=banners()+statusBar()}
+function showErr(f,e,prefix){var d=f.querySelector('.ferr');if(d)d.textContent=e.message;f.querySelectorAll('[aria-invalid]').forEach(function(x){x.removeAttribute('aria-invalid')});
+ var fld=e.field&&$(prefix+'_'+e.field);if(fld){fld.setAttribute('aria-invalid','true');try{fld.focus()}catch(x){}}if(d&&d.scrollIntoView)try{d.scrollIntoView({block:'nearest'})}catch(x){}}
+var flashT;function flash(){var t=$('toast');if(!t)return;t.textContent=NOTICE;t.hidden=false;clearTimeout(flashT);flashT=setTimeout(function(){t.hidden=true},2500);NOTICE=''}
+function startEdit(k,id){EDIT={k:k,id:id};tab={eggs:'log',sales:'sales',moves:'stock',payments:'money',expenses:'money'}[k]||tab;render(true)}
+function cancelEdit(){EDIT={k:'',id:0};render()}
+function del(k,id){
+ var old=byId(S[k],id);if(!old)return;
+ if(!confirm('Delete this record?\n\nIt is kept in the Change log, where it can be restored.'))return;
+ try{opDel(k,id);if(EDIT.k===k&&EDIT.id===id)EDIT={k:'',id:0};NOTICE='Deleted';render();flash()}catch(e){errBox(e)}}
+function errBox(e){alert(e&&e.isV?e.message:'Something went wrong: '+(e&&e.message||e))}
+function go(t){tab=t;if(t!==EDITTAB())EDIT={k:'',id:0};render(true)}
+function EDITTAB(){return {eggs:'log',sales:'sales',moves:'stock',payments:'money',expenses:'money'}[EDIT.k]||''}
 
-function reminders(){
- var t=today(),o=[];
- S.flocks.forEach(function(f){var l=lastClean(f.id),ev=S.settings.clean;
-  if(!l)o.push(['bad',esc(f.name)+': no cleaning logged yet']);
-  else{var due=diff(l,t)-ev;
-   if(due>0)o.push(['bad','Cleaning overdue: '+esc(f.name)+' ('+due+' day'+(due>1?'s':'')+' late, last cleaned '+l+')']);
-   else if(due===0)o.push(['bad','Clean today: '+esc(f.name)]);
-   else if(due>=-2)o.push(['warn','Cleaning due in '+(-due)+' day'+(due<-1?'s':'')+': '+esc(f.name)])}});
- S.sprays.forEach(function(s){
-  if(s.wd>0&&addDays(s.date,s.wd)>=t)o.push(['bad','Do NOT sell eggs from '+esc(flockName(s.flock))+' until '+addDays(s.date,s.wd)+' ('+esc(s.product)+' withdrawal)']);
-  if(s.again>0){var nx=addDays(s.date,s.again);var later=S.sprays.some(function(x){return x.id!==s.id&&x.product===s.product&&x.flock===s.flock&&x.date>s.date});
-   if(!later&&nx<=addDays(t,3))o.push([nx<t?'bad':'warn',(nx<t?'Spray overdue: ':'Spray due '+nx+': ')+esc(s.product)+' – '+esc(flockName(s.flock))])}});
- S.vendors.filter(function(v){return v.remind&&v.days&&v.days.length}).forEach(function(v){
-  for(var i=0;i<7;i++){var d=addDays(t,i);if(v.days.indexOf(dow(d))>-1){
-   o.push([i===0?'warn':'info',(i===0?'TODAY: ':i===1?'Tomorrow: ':DAYS[dow(d)]+': ')+'sell/deliver eggs to '+esc(v.name)+(v.place?' ('+esc(v.place)+')':'')]);break}}});
- if(S.trayBuys.length&&trayStock()<S.settings.trayLow){var c=cheapestTray();o.push(['warn','Egg trays low ('+r1(Math.max(0,trayStock()))+' left). Buy more'+(c?' – cheapest so far: '+esc(c.s)+' at '+money(c.p)+'/tray':'')])}
- S.feedTypes.forEach(function(ft){var st=feedStock(ft.id);if(st.bought>0&&st.left<S.settings.feedLow)o.push(['warn','Feed running low: '+esc(ft.name)+' ('+r1(Math.max(0,st.left))+' kg left)'])});
- var rank={bad:0,warn:1,info:2};return o.sort(function(a,b){return rank[a[0]]-rank[b[0]]})}
-
-/* ---- render ---- */
-var TABS=[['home','Home'],['log','Eggs'],['sales','Sales'],['feed','Feed'],['trays','Trays'],['care','Care'],['flocks','Flocks'],['reports','Reports'],['setup','Setup']];
+/* ---------- chrome ---------- */
+function banners(){var b='';
+ if(loadError)b+='<div class="banner bad" role="alert"><b>Your saved data could not be read.</b> Saving is switched off so nothing is overwritten. <button type="button" class="small plain" onclick="dlRaw()">Download the raw data</button> and send it to your developer.</div>';
+ if(conflict)b+='<div class="banner bad" role="alert"><b>Another tab or window changed the data.</b> Reload this page before making changes. <button type="button" class="small plain" onclick="location.reload()">Reload</button></div>';
+ if(storageDown)b+='<div class="banner bad" role="alert"><b>This browser is not storing data</b> (private mode or blocked storage). Records will be lost when you close the page. Download a backup before you leave.</div>';
+ else if(unsaved)b+='<div class="banner bad" role="alert"><b>The last change was not saved.</b> Download a backup now.</div>';
+ if(notes.length&&!sessionStorageGet('cooplog.notes.seen'))b+='<div class="banner info"><b>Data upgraded.</b> '+esc(notes.filter(function(x,i,a){return a.indexOf(x)===i}).join(' '))+' <button type="button" class="small plain" onclick="sessionStorageSet(\'cooplog.notes.seen\',\'1\');render()">OK</button></div>';
+ return b}
+function sessionStorageGet(k){try{return sessionStorage.getItem(k)}catch(e){return ''}}
+function sessionStorageSet(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}
+function backupText(){var m=S.meta;
+ if(m.backupConfirmedAt)return (m.backupChecksum===checksum(S)?'Backup saved ':'Last confirmed backup ')+m.backupConfirmedAt.slice(0,10)+(m.backupChecksum===checksum(S)?'':' (changes since)');
+ if(m.backupRequestedAt)return 'Backup requested '+m.backupRequestedAt.slice(0,10)+' (not confirmed)';
+ return 'No backup yet'}
+function statusBar(){var t=lastSaved?new Date(lastSaved).toTimeString().slice(0,5):'';
+ return '<div class="status" role="status"><span>'+(unsaved||loadError?'● Not saved':'● '+(t?'Saved '+t:'Ready'))+'</span><span>'+esc(backupText())+' · <a href="#" onclick="go(\'setup\');return false">Back up</a></span></div>'}
 function render(top){
- $('nav').innerHTML=TABS.map(function(t){return '<button onclick="go(\''+t[0]+'\')" aria-current="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('');
- var y=window.scrollY;
- $('app').innerHTML=({home:home,log:logView,sales:salesView,feed:feedView,trays:traysView,care:careView,flocks:flocksView,reports:reportsView,setup:setupView})[tab]();
- window.scrollTo(0,top?0:y);
- var cur=document.querySelector('nav [aria-current="true"]');if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:'center',block:'nearest'})}catch(e){}
-}
+ $('nav').innerHTML=TABS.map(function(t){return '<button type="button" onclick="go(\''+t[0]+'\')" aria-current="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('');
+ var y=window.scrollY,html;
+ try{html='<div id="bn">'+banners()+statusBar()+'</div>'+({home:home,log:logView,stock:stockView,sales:salesView,money:moneyView,supplies:suppliesView,care:careView,flocks:flocksView,reports:reportsView,history:historyView,setup:setupView})[tab]()}
+ catch(e){html='<div class="banner bad"><b>This page could not be shown:</b> '+esc(e.message)+'<br>Your data is not changed. <button type="button" class="small plain" onclick="dlRaw()">Download raw data</button></div>'}
+ $('app').innerHTML=html;window.scrollTo(0,top?0:y);
+ var cur=document.querySelector('nav [aria-current="true"]');if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({inline:'center',block:'nearest'})}catch(e){}}
 
+/* ---------- Home ---------- */
 function home(){
- var t=today(),te=sumBy(S.eggs.filter(function(e){return e.date===t}),'eggs');
- var d30=addDays(t,-29),f=fin(d30),hens=S.flocks.reduce(function(a,x){return a+hensNow(x)},0);
- var w7=S.eggs.filter(function(e){return e.date>=addDays(t,-6)});
- var rate=0,hd=0;w7.forEach(function(e){var fl=byId(S.flocks,e.flock);if(fl)hd+=henAt(fl,e.date)});if(hd)rate=sumBy(w7,'eggs')/hd*100;
- var stock=sumBy(S.eggs,'eggs')-sumBy(S.eggs,'broken')-sumBy(S.sales,'eggs');
- var rem=reminders();
- var remH=rem.length?rem.map(function(r){return '<div class="rem '+r[0]+'">'+r[1]+'</div>'}).join(''):none('No reminders. All up to date.');
- var wk=[];for(var i=6;i>=0;i--){var d=addDays(t,-i);wk.push([d,sumBy(S.eggs.filter(function(e){return e.date===d}),'eggs')])}
+ var t=today(),te=sumN(S.eggs.filter(function(e){return e.date===t}),function(e){return e.eggs}),st=stockSummary(t),f30=fin(addDays(t,-29),t);
+ var hens=S.flocks.reduce(function(a,x){return a+(x.status==='active'?hensNow(x):0)},0),w7=0,hd=0;
+ S.eggs.forEach(function(e){if(e.date>=addDays(t,-6)){var fl=byId(S.flocks,e.flock),h=fl?henAt(fl,e.date):0;if(h){w7+=e.eggs;hd+=h}}});
+ var al=alerts(),remH=al.length?al.map(function(r){return '<div class="rem '+r.lvl+'"><span>'+esc(r.text)+'</span>'+(r.go?' <a href="#" onclick="go(\''+r.go+'\');return false">Open</a>':'')+'</div>'}).join(''):none('No reminders. All up to date.');
+ var wk=[],i;for(i=6;i>=0;i--){var d=addDays(t,-i);wk.push([d,sumN(S.eggs.filter(function(e){return e.date===d}),function(e){return e.eggs})])}
  var max=Math.max.apply(null,wk.map(function(w){return w[1]}).concat([1]));
- var bars='<div style="display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:6px">'+wk.map(function(w){return '<div style="flex:1;text-align:center;font-size:11px;color:var(--mute)"><div style="color:var(--ink);font-size:12px">'+w[1]+'</div><div style="background:var(--shell);border-radius:6px 6px 0 0;min-height:2px;height:'+Math.round(w[1]/max*80)+'px"></div>'+DAYS[dow(w[0])].slice(0,3)+'</div>'}).join('')+'</div>';
- return '<h1>'+esc(S.settings.farm)+'</h1><p class="sub">'+nice(t)+' · all money in N$</p>'+
+ var bars='<div class="bars" aria-label="Eggs collected, last 7 days">'+wk.map(function(w){return '<div><em>'+w[1]+'</em><i style="height:'+Math.round(w[1]/max*80)+'px"></i>'+DAYS[dow(w[0])].slice(0,3)+'</div>'}).join('')+'</div>';
+ return '<h1>'+esc(S.settings.farm)+'</h1><p class="sub">'+esc(nice(t))+' · all money in N$</p>'+
+ '<div class="quick"><button type="button" onclick="go(\'log\')">Log eggs</button><button type="button" onclick="go(\'sales\')">New sale</button><button type="button" onclick="go(\'supplies\')">Feed</button></div>'+
  '<div class="big"><div class="stat hero"><b>'+te+'</b><span>eggs collected today</span></div>'+
- '<div class="stat"><b>'+r1(rate)+'%</b><span>7-day lay rate</span></div>'+
- '<div class="stat"><b>'+hens+'</b><span>hens now</span></div>'+
- '<div class="stat"><b>'+stock+'</b><span>eggs in hand (laid − broken − sold)</span></div>'+
- '<div class="stat"><b>'+money(S.settings.price)+'</b><span>price per egg ('+money(S.settings.price*S.settings.tray)+' / tray of '+S.settings.tray+')</span></div>'+
- '<div class="stat"><b>'+money(f.inc)+'</b><span>sales, 30 days</span></div>'+
- '<div class="stat"><b>'+money(f.exp)+'</b><span>costs, 30 days</span></div>'+
- '<div class="stat" style="grid-column:1/-1"><b class="'+(f.profit<0?'warn-t':'ok-t')+'">'+money(f.profit)+'</b><span>profit, 30 days'+(f.costEgg?' · cost per egg '+money(f.costEgg):'')+'</span></div></div>'+
- '<h2>Reminders</h2>'+remH+'<h2>Last 7 days</h2><div class="panel">'+bars+'</div>'+
- (S.flocks.length?'':'<h2>Get started</h2>'+needFlock());
-}
+ '<div class="stat"><b>'+st.closing+'</b><span>eggs in stock (sellable)'+(st.withheld?' · '+st.withheld+' on hold':'')+'</span></div>'+
+ '<div class="stat"><b>'+pct(hd?w7/hd*100:null)+'</b><span>7-day lay rate · '+hens+' hens</span></div>'+
+ '<div class="stat"><b>'+esc(money(f30.revenue))+'</b><span>sales, 30 days</span></div>'+
+ '<div class="stat"><b>'+esc(money(f30.owed))+'</b><span>owed by customers</span></div>'+
+ '<div class="stat"><b class="'+(f30.cashFlow<0?'warn-t':'ok-t')+'">'+esc(money(f30.cashFlow))+'</b><span>cash flow, 30 days</span></div>'+
+ '<div class="stat"><b class="'+(f30.estProfit<0?'warn-t':'ok-t')+'">'+esc(money(f30.estProfit))+'</b><span>estimated profit, 30 days</span></div></div>'+
+ '<h2>Reminders & flags</h2>'+remH+'<h2>Last 7 days</h2><div class="panel">'+bars+'</div>'+(S.flocks.length?'':'<h2>Get started</h2>'+needFlock())}
 
-/* ---- eggs ---- */
+/* ---------- Eggs ---------- */
 function logView(){
  if(!S.flocks.length)return '<h1>Eggs</h1>'+needFlock();
- var ft=[[0,'— none —']].concat(S.feedTypes.map(function(x){return [x.id,x.name]}));
- var days='';for(var i=0;i<14;i++){var d=addDays(today(),-i),L=S.eggs.filter(function(e){return e.date===d});
-  var e=sumBy(L,'eggs'),b=sumBy(L,'broken'),ph=perHen(L);
-  days+=item(nice(d)+(i===0?' (today)':''),L.length?b+' broken · '+(e-b)+' good · '+nd(ph).replace(/\.?0+$/,'')+' eggs/hen':'No entry',L.length?'<b>'+e+'</b>':'<span class="warn-t">–</span>')}
- var recent=S.eggs.slice().sort(sortD).slice(0,15).map(function(e){var f=byId(S.flocks,e.flock),h=f?henAt(f,e.date):0;
-  return item(e.eggs+' eggs · '+esc(f?f.name:'(removed)'),e.date+' · '+e.broken+' broken · '+(h?nd(e.eggs/h)+' per hen ('+h+' hens)':'')+' · feed '+e.feedKg+' kg '+esc(e.feedType?feedName(e.feedType):''),'','eggs',e.id)}).join('');
- return '<h1>Egg & feed log</h1><p class="sub">One entry per flock/cage per day. Saving the same day again replaces it.</p><form onsubmit="addEgg(event)">'+
- sel('ef','Flock / cage',flockOpts())+inp('ed','Date',{type:'date',val:today()})+
- '<div class="row">'+inp('ee','Eggs collected',{type:'number',attr:'inputmode="numeric" min="0" required'})+inp('eb','Broken / cracked',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+'</div>'+
- '<div class="row">'+sel('eft','Feed given (type)',ft,0)+inp('efk','Feed used (kg)',{type:'number',attr:'inputmode="decimal" min="0" step="0.1"',val:0})+'</div>'+
- '<button type="submit">Save entry</button></form>'+
- '<h2>Eggs per hen, last 30 days</h2>'+perFlockTable(addDays(today(),-29))+
- '<h2>Daily totals</h2><div class="panel">'+days+'</div><h2>Recent entries</h2><div class="panel">'+(recent||none('No entries yet.'))+'</div>';
-}
-function addEgg(e){e.preventDefault();var fl=parseInt(V('ef')),d=V('ed')||today();
- S.eggs=S.eggs.filter(function(x){return !(x.flock===fl&&x.date===d)});
- S.eggs.push({id:uid(),date:d,flock:fl,eggs:N('ee'),broken:N('eb'),feedType:parseInt(V('eft'))||0,feedKg:N('efk')});save();render()}
-function perFlockTable(fromD){
- if(!S.flocks.length)return none('No flocks yet.');
- var rows=S.flocks.map(function(f){var L=S.eggs.filter(function(e){return e.flock===f.id&&(!fromD||e.date>=fromD)});
-  var eggs=sumBy(L,'eggs'),hd=L.reduce(function(t,e){return t+henAt(f,e.date)},0),feed=sumBy(L,'feedKg'),h=hensNow(f);
-  return [esc(f.name)+' <small>('+f.kind+')</small>',h,eggs,nd(perHen(L)),hd?r1(eggs/hd*100)+'%':'–',h?nd(eggs/(L.length||1)/h)+'':'–',r1(feed)]});
- return tbl(['Flock / cage','Hens now','Eggs','Eggs per hen','Lay rate','Eggs/hen/day','Feed kg'],rows)}
+ var e=ev('eggs')||{},ft=[[0,'— none —']].concat(S.feedTypes.map(function(x){return [x.id,x.name]})),days='',i;
+ for(i=0;i<14;i++){var d=addDays(today(),-i),L=S.eggs.filter(function(x){return x.date===d}),tot=sumN(L,function(x){return x.eggs}),b=sumN(L,function(x){return x.broken}),rj=sumN(L,function(x){return x.rejected});
+  days+=item(nice(d)+(i===0?' (today)':''),L.length?b+' broken · '+rj+' rejected · '+(tot-b-rj)+' saleable':'No entry',L.length?bold(tot):raw('<span class="warn-t">–</span>'))}
+ var recent=S.eggs.slice().sort(byDateId).reverse().slice(0,15).map(function(x){var f=byId(S.flocks,x.flock),h=f?henAt(f,x.date):0;
+  return item(x.eggs+' eggs · '+(f?f.name:'(removed)'),x.date+' · '+x.broken+' broken · '+x.rejected+' rejected · '+x.grade+(h?' · '+(x.eggs/h).toFixed(2)+' per hen':'')+(x.feedKg?' · '+x.feedKg+' kg '+ftname(x.feedType):''),'',acts('eggs',x.id,true))}).join('');
+ var body=SEL('eg','flock','Flock / cage',flockOpts(false,!e.id),e.flock||(activeFlocks()[0]||{}).id)+DT('eg','date','Date',e.date)+
+ '<div class="row3">'+NUM('eg','eggs','Eggs collected',{val:e.eggs})+NUM('eg','broken','Broken',{val:e.broken||0})+NUM('eg','rejected','Rejected',{val:e.rejected||0})+'</div>'+
+ SEL('eg','grade','Grade / size',['Mixed','Small','Medium','Large','Jumbo'].map(function(x){return [x,x]}),e.grade||'Mixed')+
+ '<div class="row">'+SEL('eg','feedType','Feed given',ft,e.feedType||0)+NUM('eg','feedKg','Feed used (kg)',{dec:1,val:e.feedKg||0})+'</div>';
+ return '<h1>Egg & feed log</h1><p class="sub">One entry per flock/cage per day. Collected eggs include broken and rejected ones; those are taken off stock.</p>'+
+ FORM('egg','eg',body,e.id?'Save changes':'Save entry',editBar('eggs'))+
+ '<h2>Production by flock / cage, last 30 days</h2>'+prodTable(production(addDays(today(),-29),today()))+
+ '<h2>Daily totals</h2><div class="panel">'+days+'</div><h2>Recent entries</h2><div class="panel">'+(recent||none('No entries yet.'))+'</div>'}
+H.egg=function(ok){var o={flock:G('eg','flock'),date:G('eg','date'),eggs:G('eg','eggs'),broken:G('eg','broken'),rejected:G('eg','rejected'),grade:G('eg','grade'),feedType:G('eg','feedType'),feedKg:G('eg','feedKg')};
+ if(EDIT.k==='eggs'){opEdit('eggs',EDIT.id,o,{ok:ok});EDIT={k:'',id:0}}else opAdd('eggs',o,{ok:ok})};
+function prodTable(rows){if(!rows.length)return none('No flocks yet.');
+ return tbl(['Flock / cage','Hens','Eggs','Eggs per hen','Lay rate','Feed kg','Feed/bird/day','Deaths','Mortality'],rows.map(function(r){return [r.name+(r.status==='closed'?' (closed)':''),r.hens,r.eggs,r.entries?r.perHen.toFixed(2):'–',pct(r.layRate),r1(r.feedKg),r.feedPerBird==null?'–':Math.round(r.feedPerBird*1000)+' g',r.deaths,pct(r.mortality)]}))}
 
-/* ---- sales & vendors ---- */
+/* ---------- Stock ---------- */
+function stockView(){
+ var t=today(),asOf=ST.asOf&&isDate(ST.asOf)?ST.asOf:t,s=stockSummary(asOf),e=ev('moves')||{};
+ var rows=[['Opening stock',s.opening],['+ Eggs collected',s.collected],['− Broken',-s.broken],['− Rejected',-s.rejected],['− Sold',-s.sold],['− Internal use',-s.internal],['− Gifts',-s.gifts],['− Other losses',-s.losses],['+ Returns',s.returns],['± Adjustments',s.adjustments],['± Stock count differences',s.counts],['− On hold (medicine withdrawal)',-s.withheld]].map(function(r){return [r[0],String(r[1])]});
+ rows.push([raw('<b>Closing sellable stock</b>'),bold(s.closing,s.closing<0?'warn-t':'')]);
+ var mv=S.moves.slice().sort(byDateId).reverse().slice(0,15).map(function(m){return item(m.type+' · '+(m.eggs>0?'+':'')+m.eggs+' eggs',m.date+(m.note?' · '+m.note:'')+(m.flock?' · '+fname(m.flock):''),'',acts('moves',m.id,m.type!=='return'))}).join('');
+ var held=S.eggs.filter(function(x){var r=holdUntil(x.flock,x.date,S);return r&&r>asOf&&x.date<=asOf}).map(function(x){return [x.date,fname(x.flock),String(x.eggs-x.broken-x.rejected),holdUntil(x.flock,x.date,S)]});
+ var types=[['internal','Own / family use'],['gift','Gift'],['loss','Loss (theft, spoiled, predator)'],['return','Customer return (eggs back in)'],['adjust','Correction (+ or −)']];
+ return '<h1>Egg stock</h1><p class="sub">Every egg in and out. Sales cannot take stock below zero.</p>'+
+ (s.closing<0?'<div class="banner bad">Stock shows '+s.closing+'. Set the opening stock below, or add the missing collections.</div>':'')+
+ '<label for="st_asof">Show stock as of</label><input id="st_asof" type="date" max="'+t+'" value="'+asOf+'" onchange="ST.asOf=this.value;render()">'+
+ '<h2>Reconciliation</h2>'+tbl(['Item','Eggs'],rows)+
+ (held.length?'<h2>Batches on hold</h2>'+tbl(['Collected','Flock / cage','Eggs','Sellable from'],held):'')+
+ '<h2>'+(e.id?'Edit movement':'Record eggs used or lost')+'</h2>'+FORM('move','mv',SEL('mv','type','Type',types,e.type||'internal')+DT('mv','date','Date',e.date)+NUM('mv','eggs','Number of eggs (use − for a negative correction)',{val:e.eggs})+F('mv','note','Note',{val:e.note})+SEL('mv','flock','Flock / cage (optional)',flockOpts(true),e.flock||0),e.id?'Save changes':'Save',editBar('moves'))+
+ '<h2>Opening stock</h2>'+FORM('open','op',DT('op','date','Opening stock date',S.settings.openingDate||today())+NUM('op','eggs','Eggs in hand on that date',{val:S.settings.openingEggs}),'Save opening stock')+
+ '<h2>Physical count</h2><p class="hint">Count the eggs in hand. If it differs from the book figure, the difference is recorded as a flagged correction.</p>'+
+ FORM('count','ct',DT('ct','date','Count date')+NUM('ct','n','Eggs counted')+F('ct','reason','Reason for any difference'),'Record count')+
+ '<h2>Recent movements</h2><div class="panel">'+(mv||none('No movements yet.'))+'</div>'}
+H.move=function(ok){var o={type:G('mv','type'),date:G('mv','date'),eggs:G('mv','eggs'),note:G('mv','note'),flock:G('mv','flock')};
+ if(EDIT.k==='moves'){opEdit('moves',EDIT.id,o,{ok:ok});EDIT={k:'',id:0}}else opAdd('moves',o,{ok:ok})};
+H.open=function(){opSetOpening(G('op','date'),G('op','eggs'))};
+H.count=function(){var r=opStockCount(G('ct','n'),G('ct','date'),G('ct','reason'));if(r.diff===0){NOTICE='Count matches the book figure ✓'}};
+
+/* ---------- Sales ---------- */
 function salesView(){
- var vopt=[[0,'Other / walk-in customer']].concat(S.vendors.map(function(v){return [v.id,v.name+(v.place?' – '+v.place:'')]}));
- var recent=S.sales.slice().sort(sortD).slice(0,20).map(function(s){return item(esc(s.vendor)+' · '+s.eggs+' eggs',DAYS[dow(s.date)]+' '+s.date+(s.place?' · '+esc(s.place):'')+' · '+money(s.price)+'/egg'+(s.note?' · '+esc(s.note):''),'<b>'+money(s.eggs*s.price)+'</b>','sales',s.id)}).join('');
- var vl=S.vendors.map(function(v){return item(esc(v.name),(v.place?esc(v.place)+' · ':'')+(v.days.length?v.days.map(function(d){return DAYS[d].slice(0,3)}).join(', '):'no fixed days')+(v.price?' · '+money(v.price)+'/egg':'')+(v.remind?' · reminder ON':''),'','vendors',v.id)}).join('');
- var dchk=DAYS.map(function(d,i){return '<label><input type="checkbox" class="vd" value="'+i+'">'+d.slice(0,3)+'</label>'}).join('');
- return '<h1>Sales</h1><p class="sub">Who bought, where, which day, and at what price per egg.</p><form onsubmit="addSale(event)">'+
- sel('sv','Customer / vendor',vopt,0,'onchange="vendorPick()"')+inp('svo','Name (if other / walk-in)')+
- inp('sp','Where (place / town)',{list:'places'})+inp('sd','Date',{type:'date',val:today()})+
- '<div class="row">'+inp('st','Trays sold ('+S.settings.tray+' eggs each)',{type:'number',attr:'inputmode="numeric" min="0" step="1"',val:0})+inp('sl','Loose eggs',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+'</div>'+
- inp('spr','Price per egg (N$)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01" required',val:S.settings.price})+
- inp('sn','Note (optional)')+'<p class="hint" id="stot"></p><button type="submit">Save sale</button></form>'+
+ var e=ev('sales')||{},vopt=[[0,'Other / walk-in customer']].concat(S.vendors.map(function(v){return [v.id,v.name+(v.place?' – '+v.place:'')]}));
+ var cur=0;if(e.id){var vv=S.vendors.filter(function(v){return custKey(v.name)===custKey(e.vendor)})[0];cur=vv?vv.id:0}
+ var stat=saleStatus(),avail=stockSummary(today()).closing;
+ var recent=S.sales.slice().sort(byDateId).reverse().slice(0,20).map(function(s){var x=stat[s.id]||{paid:0,due:saleTotal(s)};var tag=x.due<=0.005?'Paid':x.paid>0?'Part paid':'Unpaid';
+  return item(s.vendor+' · '+s.eggs+' eggs',DAYS[dow(s.date)]+' '+s.date+(s.place?' · '+s.place:'')+' · '+money(s.price)+'/egg'+(s.note?' · '+s.note:''),raw('<b>'+esc(money(saleTotal(s)))+'</b> <span class="tag '+(x.due<=0.005?'ok':'warn')+'">'+tag+(x.due>0.005&&x.paid>0?' · owes '+esc(money(x.due)):'')+'</span>'),acts('sales',s.id,true))}).join('');
+ var vl=S.vendors.map(function(v){return item(v.name,(v.place?v.place+' · ':'')+(v.days.length?v.days.map(function(d){return DAYS[d].slice(0,3)}).join(', '):'no fixed days')+(v.price?' · '+money(v.price)+'/egg':'')+(v.remind?' · reminder ON':''),'',btn('Delete','del(\'vendors\','+v.id+')'))}).join('');
+ var dchk=DAYS.map(function(d,i){return '<label class="chip"><input type="checkbox" class="vd" value="'+i+'"> '+d.slice(0,3)+'</label>'}).join('');
+ var body=SEL('sl','vendor','Customer / vendor',vopt,cur,'onchange="vendorPick()"')+F('sl','other','Name (if other / walk-in)',{val:e.id&&!cur?e.vendor:''})+F('sl','place','Where (place / town)',{val:e.place,list:'places'})+DT('sl','date','Date',e.date)+
+ '<div class="row">'+NUM('sl','trays','Trays ('+S.settings.tray+' eggs each)',{val:e.id?Math.floor(e.eggs/S.settings.tray):0})+NUM('sl','loose','Loose eggs',{val:e.id?e.eggs%S.settings.tray:0})+'</div>'+
+ NUM('sl','price','Price per egg (N$)',{dec:1,val:e.price||S.settings.price})+F('sl','note','Note (optional)',{val:e.note})+
+ (e.id?'':'<div class="row">'+NUM('sl','paid','Paid now (N$, optional)',{dec:1,val:0})+SEL('sl','method','Paid by',METHODS.filter(function(m){return m!=='Migrated'}).map(function(m){return [m,m]}),'Cash')+'</div>')+
+ '<p class="hint" id="sl_tot" aria-live="polite">Stock available today: '+avail+' eggs ('+Math.floor(avail/S.settings.tray)+' trays + '+(avail%S.settings.tray)+')</p>';
+ return '<h1>Sales</h1><p class="sub">Who bought, where, which day and the price per egg. Payments are recorded separately under Money.</p>'+
+ FORM('sale','sl',body,e.id?'Save changes':'Save sale',editBar('sales'))+
  '<h2>Recent sales</h2><div class="panel">'+(recent||none('No sales yet.'))+'</div>'+
- '<h2>Vendors & reminders</h2><form onsubmit="addVendor(event)">'+inp('vn','Vendor name',{attr:'required placeholder="Shop, market, neighbour"'})+inp('vp','Place',{list:'places'})+
- '<label>Usual selling / delivery days</label><div class="days">'+dchk+'</div>'+
- inp('vpr','Their price per egg (N$, optional)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01"'})+
- '<label class="chk" style="margin-top:12px"><input type="checkbox" id="vr" checked> Remind me on those days</label><button type="submit">Add vendor</button></form>'+
- '<div class="panel" style="margin-top:10px">'+(vl||none('No vendors yet.'))+'</div>'+places();
-}
-function vendorPick(){var v=byId(S.vendors,parseInt(V('sv')));if(v){$('sp').value=v.place||'';$('spr').value=v.price||S.settings.price}}
-function addVendor(e){e.preventDefault();var days=[].slice.call(document.querySelectorAll('.vd')).filter(function(c){return c.checked}).map(function(c){return parseInt(c.value)});
- S.vendors.push({id:uid(),name:V('vn'),place:V('vp'),days:days,price:N('vpr'),remind:$('vr').checked});save();render()}
-function addSale(e){e.preventDefault();var eggs=N('st')*S.settings.tray+N('sl');if(eggs<=0){alert('Enter trays or eggs sold.');return}
- var h=holds();if(h.length&&!confirm('Egg withdrawal is active for: '+h.join('; ')+'\n\nSave this sale anyway?'))return;
- var v=byId(S.vendors,parseInt(V('sv')));
- S.sales.push({id:uid(),date:V('sd')||today(),vendor:v?v.name:(V('svo')||'Walk-in'),place:V('sp'),eggs:eggs,price:N('spr'),note:V('sn')});save();render()}
-document.addEventListener('input',function(ev){if(tab==='sales'&&$('stot')&&/^(st|sl|spr)$/.test(ev.target.id)){var eg=N('st')*S.settings.tray+N('sl');$('stot').textContent=eg?eg+' eggs × '+money(N('spr'))+' = '+money(eg*N('spr')):''}});
+ '<h2>Vendors & reminders</h2>'+FORM('vendor','vn',F('vn','name','Vendor name')+F('vn','place','Place',{list:'places'})+'<label>Usual selling / delivery days</label><div class="days">'+dchk+'</div>'+NUM('vn','price','Their price per egg (N$, optional)',{dec:1})+'<label class="chk"><input type="checkbox" id="vn_remind" checked> Remind me on those days</label>','Add vendor')+
+ '<div class="panel" style="margin-top:10px">'+(vl||none('No vendors yet.'))+'</div>'+places()}
+function vendorPick(){var v=byId(S.vendors,parseInt(G('sl','vendor'),10));if(v){$('sl_place').value=v.place||'';$('sl_price').value=v.price||S.settings.price}}
+document.addEventListener('input',function(x){if(tab==='sales'&&$('sl_tot')&&/^sl_(trays|loose|price)$/.test(x.target.id)){var eg=(parseInt(G('sl','trays'),10)||0)*S.settings.tray+(parseInt(G('sl','loose'),10)||0),p=parseFloat(String(G('sl','price')).replace(',','.'))||0;
+ $('sl_tot').textContent=eg?eg+' eggs × '+money(p)+' = '+money(r2(eg*p)):''}});
+H.sale=function(ok){
+ var v=byId(S.vendors,parseInt(G('sl','vendor'),10)),name=v?v.name:G('sl','other');
+ var tr=cleanObj({a:{t:'int',max:MAXEGGS},b:{t:'int',max:MAXEGGS}},{a:G('sl','trays'),b:G('sl','loose')},S);if(tr.errs.length)fail('Trays or loose eggs '+tr.errs[0].msg.replace(/^.*? (is|must)/,'$1'),'trays');
+ var eggs=tr.rec.a*S.settings.tray+tr.rec.b;if(eggs<=0)fail('Enter the trays or loose eggs sold.','trays');
+ var o={vendor:name||'Walk-in',place:G('sl','place'),date:G('sl','date'),eggs:eggs,price:G('sl','price'),note:G('sl','note')};
+ if(EDIT.k==='sales'){opEdit('sales',EDIT.id,o,{ok:ok});EDIT={k:'',id:0};return}
+ var paidRaw=G('sl','paid'),paid=0;
+ if(String(paidRaw).trim()!==''){var pr=cleanObj({a:{t:'money',max:MAXNUM}},{a:paidRaw},S);if(pr.errs.length)fail('Paid now '+pr.errs[0].msg.replace(/^.*? (is|must)/,'$1'),'paid');paid=pr.rec.a}
+ var pc=cleanObj({p:SPEC.sales.price},{p:G('sl','price')},S);if(pc.errs.length)fail(pc.errs[0].msg,'price');
+ if(paid>r2(eggs*pc.rec.p)+0.005)fail('Paid now cannot be more than the sale total ('+money(r2(eggs*pc.rec.p))+').','paid');
+ var s=opAdd('sales',o,{ok:ok});
+ if(paid>0)opAdd('payments',{date:o.date,customer:s.vendor,saleId:s.id,amount:paid,method:G('sl','method'),kind:'in',note:'Paid at sale'},{ok:{overpay:true}})};
+H.vendor=function(){var days=[].slice.call(document.querySelectorAll('.vd')).filter(function(c){return c.checked}).map(function(c){return parseInt(c.value,10)});
+ opAdd('vendors',{name:G('vn','name'),place:G('vn','place'),days:days,price:G('vn','price'),remind:$('vn_remind').checked})};
 
-/* ---- feed ---- */
-function feedView(){
- var ftOpts=S.feedTypes.map(function(x){return [x.id,x.name]});
- var types=S.feedTypes.map(function(x){var st=feedStock(x.id);return item(esc(x.name),(x.bagKg?x.bagKg+' kg bag · ':'')+(x.note?esc(x.note)+' · ':'')+'bought '+r1(st.bought)+' kg · used '+r1(st.used)+' kg','<b class="'+(st.bought>0&&st.left<S.settings.feedLow?'warn-t':'')+'">'+r1(st.left)+' kg left</b>','feedTypes',x.id)}).join('');
- var buys=S.feedBuys.slice().sort(sortD).slice(0,15).map(function(b){var kg=b.bags*b.bagKg;return item(esc(feedName(b.type))+' · '+b.bags+' × '+b.bagKg+' kg',b.date+' · bought at '+esc(b.where||'?')+' · '+(kg?money(b.cost/kg)+'/kg':''),'<b>'+money(b.cost)+'</b>','feedBuys',b.id)}).join('');
- var byShop={};S.feedBuys.forEach(function(b){var w=b.where||'?',kg=b.bags*b.bagKg;if(!kg)return;(byShop[w]=byShop[w]||{c:0,k:0,n:0});byShop[w].c+=b.cost;byShop[w].k+=kg;byShop[w].n++});
- var shops=Object.keys(byShop).sort(function(a,b){return byShop[a].c/byShop[a].k-byShop[b].c/byShop[b].k}).map(function(w){return [esc(w),byShop[w].n,r1(byShop[w].k)+' kg',money(byShop[w].c/byShop[w].k)+'/kg']});
- return '<h1>Feed</h1><p class="sub">Types of feed, what you bought, how much, when and where.</p>'+
- '<h2>Feed types & stock</h2><div class="panel">'+(types||none('Add the feed types you use (e.g. Layer mash, Grower, Chick starter).'))+'</div>'+
- '<form onsubmit="addFeedType(event)" style="margin-top:10px">'+inp('fn','Feed type name',{attr:'required placeholder="Layer mash"'})+'<div class="row">'+inp('fk','Usual bag size (kg)',{type:'number',attr:'inputmode="decimal" min="0" step="0.5"',val:50})+inp('fno','Note (optional)')+'</div><button type="submit">Add feed type</button></form>'+
- '<h2>Record a feed purchase</h2>'+(S.feedTypes.length?'<form onsubmit="addFeedBuy(event)">'+sel('bt','Feed type',ftOpts,'','onchange="bagPick()"')+inp('bd','Date bought',{type:'date',val:today()})+
- '<div class="row">'+inp('bb','Bags',{type:'number',attr:'inputmode="decimal" min="0" step="0.5" required'})+inp('bk','Kg per bag',{type:'number',attr:'inputmode="decimal" min="0" step="0.5" required',val:S.feedTypes[0].bagKg||50})+'</div>'+
- inp('bc','Total cost (N$)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01" required'})+inp('bw','Where bought',{attr:'placeholder="Shop / supplier / town"',list:'places'})+
- '<button type="submit">Save purchase</button></form>':none('Add a feed type first.'))+
- '<h2>Recent purchases</h2><div class="panel">'+(buys||none('No purchases yet.'))+'</div>'+
- '<h2>Where is feed cheapest?</h2>'+(shops.length?tbl(['Where','Buys','Total','Avg price'],shops):none('Record purchases to compare shops.'))+places();
-}
-function bagPick(){var t=byId(S.feedTypes,parseInt(V('bt')));if(t&&t.bagKg)$('bk').value=t.bagKg}
-function addFeedType(e){e.preventDefault();S.feedTypes.push({id:uid(),name:V('fn'),bagKg:N('fk'),note:V('fno')});save();render()}
-function addFeedBuy(e){e.preventDefault();S.feedBuys.push({id:uid(),type:parseInt(V('bt')),date:V('bd')||today(),bags:N('bb'),bagKg:N('bk'),cost:N('bc'),where:V('bw')});save();render()}
+/* ---------- Money: payments, returns, expenses, statements ---------- */
+function moneyView(){
+ var cs=customers(),keys=Object.keys(cs).sort(function(a,b){return cs[b].owed-cs[a].owed}),e=ev('payments')||{},x=ev('expenses')||{};
+ var rows=keys.map(function(k){var c=cs[k];return [c.name,money(c.sales),money(c.paid),money(c.credits),raw('<b class="'+(c.owed>0.005?'warn-t':'')+'">'+esc(money(c.owed))+'</b>'),raw(btn('Statement','showStatement('+keys.indexOf(k)+')','plain'))]});
+ var custOpts=keys.map(function(k){return [cs[k].name,cs[k].name+(cs[k].owed>0.005?' – owes '+money(cs[k].owed):'')]});
+ var pays=S.payments.slice().sort(byDateId).reverse().slice(0,15).map(function(p){return item((p.kind==='in'?'Payment from ':'Refund to ')+p.customer,p.date+' · '+p.method+(p.note?' · '+p.note:''),bold((p.kind==='in'?'+':'−')+money(p.amount)),acts('payments',p.id,p.kind==='in'&&!p.link&&!p.migrated))}).join('');
+ var exps=S.expenses.slice().sort(byDateId).reverse().slice(0,15).map(function(p){return item(p.cat,p.date+' · '+p.method+(p.note?' · '+p.note:''),bold(money(p.amt)),acts('expenses',p.id,true))}).join('');
+ var sold=S.sales.length;
+ return '<h1>Money</h1><p class="sub">Payments received, customer balances and running costs. All in N$.</p>'+
+ '<h2>Customer balances</h2>'+(rows.length?tbl(['Customer','Sales','Paid','Credits','Owes',''],rows):none('No sales yet.'))+
+ '<h2>'+(e.id?'Edit payment':'Record a payment received')+'</h2>'+(custOpts.length?FORM('pay','py',SEL('py','customer','Customer',custOpts,e.customer||(keys[0]?cs[keys[0]].name:''),'onchange="payPick()"')+'<div class="row">'+NUM('py','amount','Amount (N$)',{dec:1,val:e.amount||(keys[0]&&cs[keys[0]].owed>0?cs[keys[0]].owed:'')})+SEL('py','method','Paid by',METHODS.filter(function(m){return m!=='Migrated'}).map(function(m){return [m,m]}),e.method||'Cash')+'</div>'+DT('py','date','Date',e.date)+F('py','note','Note (optional)',{val:e.note}),e.id?'Save changes':'Save payment',editBar('payments')):none('Record a sale first.'))+
+ '<h2>Return, credit or refund</h2>'+(custOpts.length?FORM('ret','rt',SEL('rt','customer','Customer',custOpts,'')+'<div class="row">'+NUM('rt','amount','Credit amount (N$)',{dec:1})+NUM('rt','eggs','Eggs returned to stock',{val:0})+'</div>'+DT('rt','date','Date')+F('rt','reason','Reason')+'<label class="chk"><input type="checkbox" id="rt_refund"> Pay the money back now (refund)</label>','Record credit'):none('Record a sale first.'))+
+ '<h2>'+(x.id?'Edit expense':'Record an expense')+'</h2>'+FORM('exp','ex',SEL('ex','cat','Category',EXPCATS.map(function(c){return [c,c]}),x.cat||'Other')+'<div class="row">'+NUM('ex','amt','Amount (N$)',{dec:1,val:x.amt})+SEL('ex','method','Paid by',METHODS.filter(function(m){return m!=='Migrated'}).map(function(m){return [m,m]}),x.method||'Cash')+'</div>'+DT('ex','date','Date',x.date)+F('ex','note','Note',{val:x.note}),x.id?'Save changes':'Save expense',editBar('expenses'))+
+ '<p class="hint">Feed, trays and sprays are recorded on the Supplies and Care tabs and count as costs automatically.</p>'+
+ '<h2>Recent payments</h2><div class="panel">'+(pays||none('No payments yet.'))+'</div><h2>Recent expenses</h2><div class="panel">'+(exps||none('No expenses yet.'))+'</div>'+
+ '<h2>Customer statement</h2>'+statementView(keys.map(function(k){return cs[k].name}))}
+function payPick(){var cs=customers(),c=cs[custKey(G('py','customer'))];if(c&&c.owed>0)$('py_amount').value=c.owed}
+H.pay=function(ok){var o={customer:G('py','customer'),amount:G('py','amount'),method:G('py','method'),date:G('py','date'),note:G('py','note'),kind:'in'};
+ if(EDIT.k==='payments'){opEdit('payments',EDIT.id,o,{ok:ok});EDIT={k:'',id:0}}else opAdd('payments',o,{ok:ok})};
+H.ret=function(ok){opReturn({customer:G('rt','customer'),amount:G('rt','amount'),eggs:G('rt','eggs'),date:G('rt','date'),reason:G('rt','reason'),refundNow:$('rt_refund').checked},{ok:ok})};
+H.exp=function(ok){var o={cat:G('ex','cat'),amt:G('ex','amt'),method:G('ex','method'),date:G('ex','date'),note:G('ex','note')};
+ if(EDIT.k==='expenses'){opEdit('expenses',EDIT.id,o,{ok:ok});EDIT={k:'',id:0}}else opAdd('expenses',o,{ok:ok})};
+function showStatement(i){var k=Object.keys(customers()).sort(function(a,b){return customers()[b].owed-customers()[a].owed})[i];if(k)STM.cust=customers()[k].name;render();var e=$('stm');if(e&&e.scrollIntoView)e.scrollIntoView()}
+function statementView(names){if(!names.length)return none('No customers yet.');
+ var c=STM.cust&&names.indexOf(STM.cust)>=0?STM.cust:names[0],r=statement(c,isDate(STM.from)?STM.from:'',isDate(STM.to)?STM.to:'');
+ return '<div class="panel" id="stm"><div class="row"><div><label for="stm_c">Customer</label><select id="stm_c" onchange="STM.cust=this.value;render()">'+names.map(function(n){return '<option value="'+esc(n)+'"'+(n===c?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select></div><div></div></div>'+
+ '<div class="row"><div><label for="stm_f">From</label><input id="stm_f" type="date" value="'+esc(STM.from)+'" onchange="STM.from=this.value;render()"></div><div><label for="stm_t">To</label><input id="stm_t" type="date" value="'+esc(STM.to)+'" onchange="STM.to=this.value;render()"></div></div></div>'+
+ tbl(['Date','Details','Charged','Paid / credit','Balance'],[['','Balance brought forward','','',money(r.opening)]].concat(r.rows.map(function(x){return [x.date,x.desc,x.debit?money(x.debit):'',x.credit?money(x.credit):'',money(x.balance)]})).concat([[raw('<b>Balance owed</b>'),'','','',bold(money(r.closing))]]))+
+ '<div class="tabs-sub"><button type="button" class="alt" onclick="exportStatement()">Download statement (CSV)</button><button type="button" class="alt" onclick="window.print()">Print</button></div>'}
 
-/* ---- egg trays ---- */
-function traysView(){
- var st=trayStock(),c=cheapestTray();
- var sup=S.suppliers.map(function(s){return item(esc(s.name),(s.place?esc(s.place):'')+(s.note?' · '+esc(s.note):''),'','suppliers',s.id)}).join('');
- var buys=S.trayBuys.slice().sort(sortD).slice(0,15).map(function(b){return item(b.qty+' trays from '+esc(b.supplier||'?'),b.date+' ('+DAYS[dow(b.date)]+') · '+(b.qty?money(b.cost/b.qty)+' per tray':''),'<b>'+money(b.cost)+'</b>','trayBuys',b.id)}).join('');
- var bySup={};S.trayBuys.forEach(function(b){if(!b.qty)return;var k=b.supplier||'?';(bySup[k]=bySup[k]||{q:0,c:0,days:{}});bySup[k].q+=b.qty;bySup[k].c+=b.cost;bySup[k].days[DAYS[dow(b.date)]]=1});
- var cmp=Object.keys(bySup).sort(function(a,b){return bySup[a].c/bySup[a].q-bySup[b].c/bySup[b].q}).map(function(k){return [esc(k),bySup[k].q,money(bySup[k].c/bySup[k].q),Object.keys(bySup[k].days).join(', ')]});
- return '<h1>Egg trays</h1><p class="sub">Where and when to buy trays.</p><div class="big"><div class="stat"><b class="'+(S.trayBuys.length&&st<S.settings.trayLow?'warn-t':'')+'">'+r1(Math.max(0,st))+'</b><span>trays left (bought − sold eggs ÷ '+S.settings.tray+')</span></div>'+
- '<div class="stat"><b>'+(c?esc(c.s):'–')+'</b><span>'+(c?'cheapest: '+money(c.p)+' per tray':'cheapest supplier (needs purchases)')+'</span></div></div>'+
- '<h2>Record tray purchase</h2><form onsubmit="addTrayBuy(event)">'+inp('tsn','Supplier / where',{attr:'required',list:'places'})+inp('td','Date bought',{type:'date',val:today()})+
- '<div class="row">'+inp('tq','Number of trays',{type:'number',attr:'inputmode="numeric" min="1" required'})+inp('tc','Total cost (N$)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01" required'})+'</div><button type="submit">Save purchase</button></form>'+
- '<h2>Recent tray purchases</h2><div class="panel">'+(buys||none('No tray purchases yet.'))+'</div>'+
- '<h2>Compare suppliers</h2>'+(cmp.length?tbl(['Supplier','Trays','Avg per tray','Days bought'],cmp):none('Record purchases to compare.'))+
- '<h2>Tray suppliers (where to buy)</h2><form onsubmit="addSupplier(event)">'+inp('sn1','Supplier name',{attr:'required'})+inp('sl1','Place / contact',{list:'places'})+inp('sno','Notes (e.g. open days, minimum order)')+'<button type="submit">Add supplier</button></form>'+
- '<div class="panel" style="margin-top:10px">'+(sup||none('No suppliers saved yet.'))+'</div>'+places();
-}
-function addTrayBuy(e){e.preventDefault();S.trayBuys.push({id:uid(),date:V('td')||today(),supplier:V('tsn'),qty:N('tq'),cost:N('tc')});save();render()}
-function addSupplier(e){e.preventDefault();S.suppliers.push({id:uid(),name:V('sn1'),place:V('sl1'),note:V('sno')});save();render()}
+/* ---------- Supplies: feed + trays ---------- */
+function suppliesView(){
+ var t=today(),ftOpts=S.feedTypes.map(function(x){return [x.id,x.name]});
+ var types=S.feedTypes.map(function(x){var left=feedStock(x.id),lvl=x.reorderKg||S.settings.feedLow;return item(x.name,(x.bagKg?x.bagKg+' kg bag · ':'')+(x.openingKg?'opening '+x.openingKg+' kg · ':'')+(x.note||''),bold(left+' kg left',left<=lvl?'warn-t':''),btn('Delete','del(\'feedTypes\','+x.id+')'))}).join('');
+ var buys=S.feedBuys.slice().sort(byDateId).reverse().slice(0,10).map(function(b){var kg=b.bags*b.bagKg;return item(ftname(b.type)+' · '+b.bags+' × '+b.bagKg+' kg',b.date+' · '+(b.where||'?')+(kg?' · '+money(b.cost/kg)+'/kg':''),bold(money(b.cost)),acts('feedBuys',b.id,false))}).join('');
+ var fm=S.feedMoves.slice().sort(byDateId).reverse().slice(0,10).map(function(m){return item(m.kind+' · '+ftname(m.type)+' · '+m.kg+' kg',m.date+' · '+fname(m.flock)+(m.note?' · '+m.note:''),'',acts('feedMoves',m.id,false))}).join('');
+ var byShop={};S.feedBuys.forEach(function(b){var w=b.where||'?',kg=b.bags*b.bagKg;if(!kg)return;var o=byShop[w]||(byShop[w]={c:0,k:0,n:0});o.c+=b.cost;o.k+=kg;o.n++});
+ var shops=Object.keys(byShop).sort(function(a,b){return byShop[a].c/byShop[a].k-byShop[b].c/byShop[b].k}).map(function(w){return [w,byShop[w].n,r1(byShop[w].k)+' kg',money(byShop[w].c/byShop[w].k)+'/kg']});
+ var feedForms=S.feedTypes.length?
+  '<h2>Feed purchase</h2>'+FORM('fbuy','fb',SEL('fb','type','Feed type',ftOpts,ftOpts[0][0],'onchange="bagPick()"')+DT('fb','date','Date bought')+'<div class="row">'+NUM('fb','bags','Bags',{dec:1})+NUM('fb','bagKg','Kg per bag',{dec:1,val:S.feedTypes[0].bagKg||50})+'</div>'+NUM('fb','cost','Total cost (N$)',{dec:1})+F('fb','where','Where bought',{list:'places'}),'Save purchase')+
+  '<h2>Feed used, wasted or corrected</h2>'+FORM('fuse','fu',SEL('fu','kind','Type',[['use','Fed to birds'],['waste','Wasted / spoiled'],['adjust','Stock correction (+ or −)']],'use')+SEL('fu','type','Feed type',ftOpts,ftOpts[0][0])+SEL('fu','flock','Flock / cage',flockOpts(true),0)+DT('fu','date','Date')+NUM('fu','kg','Kilograms',{dec:1})+F('fu','note','Note'),'Save')
+  :'<div class="empty">Add a feed type to record purchases.</div>';
+ var traySt=trayStock(),cheap=null;S.trayBuys.forEach(function(b){var p=b.cost/b.qty;if(!cheap||p<cheap.p)cheap={p:p,s:b.supplier}});
+ var tsup=S.suppliers.map(function(s){return item(s.name,(s.place||'')+(s.note?' · '+s.note:''),'',btn('Delete','del(\'suppliers\','+s.id+')'))}).join('');
+ var tbuys=S.trayBuys.slice().sort(byDateId).reverse().slice(0,10).map(function(b){return item(b.qty+' trays · '+b.supplier,b.date+' ('+DAYS[dow(b.date)]+') · '+money(b.cost/b.qty)+' per tray',bold(money(b.cost)),acts('trayBuys',b.id,false))}).join('');
+ return '<h1>Supplies</h1><p class="sub">Feed and egg trays: what was bought, when, where and how much is left.</p>'+
+ '<h2>Feed types & stock</h2><div class="panel">'+(types||none('Add the feed types you use.'))+'</div>'+
+ FORM('ftype','ft',F('ft','name','Feed type name')+'<div class="row">'+NUM('ft','bagKg','Usual bag (kg)',{dec:1,val:50})+NUM('ft','reorderKg','Reorder at (kg)',{dec:1,val:0})+'</div><div class="row">'+NUM('ft','openingKg','Opening stock (kg)',{dec:1,val:0})+NUM('ft','openingCost','Opening cost per kg (N$)',{dec:1,val:0})+'</div>'+F('ft','note','Note'),'Add feed type')+
+ feedForms+'<h2>Recent feed purchases</h2><div class="panel">'+(buys||none('None yet.'))+'</div><h2>Feed used / wasted / corrected</h2><div class="panel">'+(fm||none('None yet.'))+'</div>'+
+ '<h2>Where is feed cheapest?</h2>'+(shops.length?tbl(['Where','Buys','Total','Avg price'],shops):none('Record purchases to compare shops.'))+
+ '<h2>Egg trays</h2><div class="big"><div class="stat"><b class="'+(S.trayBuys.length&&traySt<S.settings.trayLow?'warn-t':'')+'">'+r1(Math.max(0,traySt))+'</b><span>trays left (bought − eggs sold ÷ '+S.settings.tray+')</span></div><div class="stat"><b>'+esc(cheap?cheap.s:'–')+'</b><span>'+(cheap?'cheapest: '+esc(money(cheap.p))+' per tray':'cheapest supplier')+'</span></div></div>'+
+ FORM('tray','tb',F('tb','supplier','Supplier / where',{list:'places'})+DT('tb','date','Date bought')+'<div class="row">'+NUM('tb','qty','Number of trays')+NUM('tb','cost','Total cost (N$)',{dec:1})+'</div>','Save tray purchase')+
+ '<div class="panel" style="margin-top:10px">'+(tbuys||none('No tray purchases yet.'))+'</div>'+
+ '<h2>Tray suppliers (where to buy)</h2>'+FORM('supplier','sp',F('sp','name','Supplier name')+F('sp','place','Place / contact',{list:'places'})+F('sp','note','Notes (open days, minimum order)'),'Add supplier')+'<div class="panel" style="margin-top:10px">'+(tsup||none('No suppliers saved.'))+'</div>'+places()}
+function bagPick(){var t=byId(S.feedTypes,parseInt(G('fb','type'),10));if(t&&t.bagKg)$('fb_bagKg').value=t.bagKg}
+H.ftype=function(){opAdd('feedTypes',{name:G('ft','name'),bagKg:G('ft','bagKg'),reorderKg:G('ft','reorderKg'),openingKg:G('ft','openingKg'),openingCost:G('ft','openingCost'),note:G('ft','note')})};
+H.fbuy=function(ok){opAdd('feedBuys',{type:G('fb','type'),date:G('fb','date'),bags:G('fb','bags'),bagKg:G('fb','bagKg'),cost:G('fb','cost'),where:G('fb','where')},{ok:ok})};
+H.fuse=function(ok){opAdd('feedMoves',{kind:G('fu','kind'),type:G('fu','type'),flock:G('fu','flock'),date:G('fu','date'),kg:G('fu','kg'),note:G('fu','note')},{ok:ok})};
+H.tray=function(ok){opAdd('trayBuys',{supplier:G('tb','supplier'),date:G('tb','date'),qty:G('tb','qty'),cost:G('tb','cost')},{ok:ok})};
+H.supplier=function(){opAdd('suppliers',{name:G('sp','name'),place:G('sp','place'),note:G('sp','note')})};
 
-/* ---- care: cleaning & sprays ---- */
+/* ---------- Care: cleaning, sprays, medicine ---------- */
 var KINDS=['Pesticide / insecticide','Mite / lice spray','Disinfectant','Dewormer','Vaccine / medicine','Other'];
 function careView(){
- var t=today(),ev=S.settings.clean;
- var status=S.flocks.map(function(f){var l=lastClean(f.id),n=l?diff(l,t):null,late=n===null||n>=ev;
-  return item(esc(f.name),l?'Last cleaned '+l+' · next due '+addDays(l,ev):'Never cleaned','<b class="'+(late?'warn-t':'')+'">'+(n===null?'No record':n+' days ago')+'</b>')}).join('');
- var cl=S.cleans.slice().sort(sortD).slice(0,10).map(function(c){return item(esc(c.task)+' · '+esc(flockName(c.flock)),c.date,'','cleans',c.id)}).join('');
- var sp=S.sprays.slice().sort(sortD).slice(0,15).map(function(s){var u=s.wd>0?addDays(s.date,s.wd):'',hold=u&&u>=t;
-  return item(esc(s.product)+' · '+esc(flockName(s.flock)),s.date+' · '+esc(s.kind)+(s.again?' · repeat every '+s.again+' days':'')+(hold?' · <span class="warn-t">no egg sales until '+u+'</span>':'')+(s.notes?' · '+esc(s.notes):''),s.cost?'<b>'+money(s.cost)+'</b>':'','sprays',s.id)}).join('');
  if(!S.flocks.length)return '<h1>Care</h1>'+needFlock();
- return '<h1>Care</h1><p class="sub">Cleaning every '+ev+' days (change under Setup). Sprays and medicine records.</p>'+
- '<h2>Cleaning status</h2><div class="panel">'+status+'</div>'+
- '<h2>Log cleaning</h2><form onsubmit="addClean(event)">'+sel('cf','Flock / cage',flockOpts(true))+'<div class="row">'+sel('ct','Task',['Coop cleaned','Disinfected','Bedding changed','Feeders & drinkers washed','Cage trays emptied'].map(function(x){return [x,x]}))+inp('cd','Date',{type:'date',val:t})+'</div><button type="submit">Save cleaning</button></form>'+
- (cl?'<h2>Recent cleaning</h2><div class="panel">'+cl+'</div>':'')+
- '<h2>Record a spray / pesticide / medicine</h2><form onsubmit="addSpray(event)">'+inp('sprn','Product name',{attr:'required placeholder="e.g. Ectomin, Virkon, Ivermectin"'})+
- '<div class="row">'+sel('spk','Type',KINDS.map(function(x){return [x,x]}))+sel('spf','Which flock / cage',flockOpts(true))+'</div>'+
- '<div class="row">'+inp('spd','Date applied',{type:'date',val:t})+inp('spc','Cost (N$, optional)',{type:'number',attr:'inputmode="decimal" min="0" step="0.01"'})+'</div>'+
- '<div class="row">'+inp('spw','Egg withdrawal (days)',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+inp('spa','Repeat every (days, optional)',{type:'number',attr:'inputmode="numeric" min="0"',val:0})+'</div>'+
- inp('spn','Notes (dose, method)')+'<button type="submit">Save record</button></form>'+
- '<h2>Spray & medicine records</h2><div class="panel">'+(sp||none('No records yet.'))+'</div>';
-}
-function addClean(e){e.preventDefault();S.cleans.push({id:uid(),flock:parseInt(V('cf')),task:V('ct'),date:V('cd')||today()});save();render()}
-function addSpray(e){e.preventDefault();S.sprays.push({id:uid(),product:V('sprn'),kind:V('spk'),flock:parseInt(V('spf')),date:V('spd')||today(),cost:N('spc'),wd:N('spw'),again:N('spa'),notes:V('spn')});save();render()}
+ var t=today(),ev_=S.settings.clean;
+ var status=activeFlocks().map(function(f){var l=S.cleans.filter(function(c){return c.flock===0||c.flock===f.id}).map(function(c){return c.date}).sort().pop()||'',n=l?diff(l,t):null,late=n===null||n>=ev_;
+  return item(f.name,l?'Last cleaned '+l+' · next due '+addDays(l,ev_):'Never cleaned',bold(n===null?'No record':n+' days ago',late?'warn-t':''))}).join('');
+ var cl=S.cleans.slice().sort(byDateId).reverse().slice(0,10).map(function(c){return item(c.task+' · '+fname(c.flock),c.date,'',btn('Delete','del(\'cleans\','+c.id+')'))}).join('');
+ var sp=S.sprays.slice().sort(byDateId).reverse().slice(0,15).map(function(s){var u=s.wd>0?addDays(s.date,s.wd):'',hold=u&&u>=t;
+  return item(s.product+' · '+fname(s.flock),raw(esc(s.date+' · '+s.kind+(s.again?' · repeat every '+s.again+' days':'')+(s.wd?' · withdrawal '+s.wd+' days'+(s.verified?' (verified: '+(s.source||'checked')+')':' (source: '+s.source+')'):''))+(hold?' · <span class="warn-t">eggs on hold until '+esc(u)+'</span>':'')+esc(s.notes?' · '+s.notes:'')),s.cost?bold(money(s.cost)):'',btn('Delete','del(\'sprays\','+s.id+')'))}).join('');
+ return '<h1>Care</h1><p class="sub">Cleaning every '+ev_+' days (change under Setup). Spray and medicine records.</p>'+
+ '<h2>Cleaning status</h2><div class="panel">'+(status||none('No active flocks.'))+'</div>'+
+ '<h2>Log cleaning</h2>'+FORM('clean','cl',SEL('cl','flock','Flock / cage',flockOpts(true,true),0)+'<div class="row">'+SEL('cl','task','Task',['Coop cleaned','Disinfected','Bedding changed','Feeders & drinkers washed','Cage trays emptied'].map(function(x){return [x,x]}))+DT('cl','date','Date')+'</div>','Save cleaning')+(cl?'<h2>Recent cleaning</h2><div class="panel">'+cl+'</div>':'')+
+ '<h2>Record a spray / pesticide / medicine</h2><p class="hint">If a withdrawal period applies, eggs from that flock laid from the treatment date until the end of the period are held back from sellable stock. Enter the days exactly as the product label or vet states.</p>'+
+ FORM('spray','sr',F('sr','product','Product name')+'<div class="row">'+SEL('sr','kind','Type',KINDS.map(function(x){return [x,x]}))+SEL('sr','flock','Flock / cage',flockOpts(true,true),0)+'</div>'+
+ '<div class="row">'+DT('sr','date','Date applied')+NUM('sr','cost','Cost (N$, optional)',{dec:1})+'</div><div class="row">'+NUM('sr','wd','Egg withdrawal (days)',{val:0})+NUM('sr','again','Repeat every (days, optional)',{val:0})+'</div>'+
+ F('sr','source','Withdrawal period taken from (label / vet)')+'<label class="chk"><input type="checkbox" id="sr_verified"> I checked the withdrawal period on the label or with a vet</label>'+F('sr','notes','Notes (dose, method)'),'Save record')+
+ '<h2>Spray & medicine records</h2><div class="panel">'+(sp||none('No records yet.'))+'</div>'}
+H.clean=function(){opAdd('cleans',{flock:G('cl','flock'),task:G('cl','task'),date:G('cl','date')})};
+H.spray=function(ok){opAdd('sprays',{product:G('sr','product'),kind:G('sr','kind'),flock:G('sr','flock'),date:G('sr','date'),cost:G('sr','cost'),wd:G('sr','wd'),again:G('sr','again'),notes:G('sr','notes'),source:G('sr','source'),verified:$('sr_verified').checked},{ok:ok})};
 
-/* ---- flocks & cages ---- */
+/* ---------- Flocks ---------- */
 function flocksView(){
- var list=S.flocks.map(function(f){var h=hensNow(f);return item(esc(f.name)+' <small style="display:inline">('+f.kind+')</small>',h+' hens now · started with '+f.hens+(f.breed?' · '+esc(f.breed):'')+(f.start?' · since '+f.start:''),'<button class="small" onclick="delFlock('+f.id+')">Remove</button>')}).join('');
- var hist=S.adjust.slice().sort(sortD).slice(0,20).map(function(a){return item((a.delta>0?'+':'')+a.delta+' hens · '+esc(flockName(a.flock)),a.date+(a.reason?' · '+esc(a.reason):''),'','adjust',a.id)}).join('');
- return '<h1>Flocks & cages</h1><p class="sub">Each flock or cage has its own hen count, so eggs-per-hen stays accurate.</p>'+
+ var list=S.flocks.map(function(f){var h=hensNow(f);return item(f.name+' ('+f.kind+')'+(f.status==='closed'?' – closed '+f.closed:''),h+' hens now · started with '+f.hens+(f.breed?' · '+f.breed:'')+(f.start?' · since '+f.start:''),'',(f.status==='closed'?btn('Reopen','reopenFlock('+f.id+')','plain'):'')+btn('Delete','del(\'flocks\','+f.id+')'))}).join('');
+ var hist=S.adjust.slice().sort(byDateId).reverse().slice(0,25).map(function(a){return item((a.delta>0?'+':'')+a.delta+' hens · '+fname(a.flock),a.date+' · '+a.type+(a.reason?' · '+a.reason:''),'',a.xfer?btn('Delete transfer','delXfer('+a.xfer+')'):btn('Delete','del(\'adjust\','+a.id+')'))}).join('');
+ var act=activeFlocks();
+ return '<h1>Flocks & cages</h1><p class="sub">Each flock or cage has its own hen count history, so eggs per hen stays accurate.</p>'+
  '<div class="panel">'+(list||none('No flocks or cages yet.'))+'</div>'+
- '<h2>Add flock / cage</h2><form onsubmit="addFlock(event)">'+inp('fln','Name',{attr:'required placeholder="Cage 1 / House A"'})+
- '<div class="row">'+sel('flk','Type',[['Flock','Flock (free range / floor)'],['Cage','Cage']])+inp('flh','Number of hens',{type:'number',attr:'inputmode="numeric" min="0" required'})+'</div>'+
- '<div class="row">'+inp('flb','Breed (optional)',{attr:'placeholder="Lohmann, Hy-Line..."'})+inp('fls','Start date',{type:'date',val:today()})+'</div><button type="submit">Add</button></form>'+
- (S.flocks.length?'<h2>Change number of hens</h2><form onsubmit="addAdj(event)">'+sel('af','Flock / cage',flockOpts())+'<div class="row">'+sel('as','Change',[['+','Increase (+)'],['-','Decrease (−)']])+inp('an','How many hens',{type:'number',attr:'inputmode="numeric" min="1" required'})+'</div>'+
- '<div class="row">'+inp('ad','Date',{type:'date',val:today()})+sel('ar','Reason',['New hens added','Died','Culled','Sold','Moved to another cage','Count correction'].map(function(x){return [x,x]}))+'</div><button type="submit">Save change</button></form>':'')+
- (hist?'<h2>Hen count history</h2><div class="panel">'+hist+'</div>':'');
-}
-function addFlock(e){e.preventDefault();S.flocks.push({id:uid(),name:V('fln'),kind:V('flk'),hens:N('flh'),breed:V('flb'),start:V('fls')});save();render()}
-function addAdj(e){e.preventDefault();var n=N('an');if(!n)return;S.adjust.push({id:uid(),flock:parseInt(V('af')),date:V('ad')||today(),delta:(V('as')==='-'?-1:1)*n,reason:V('ar')});save();render()}
-function delFlock(id){if(!confirm('Remove this flock/cage and its hen-count history? Egg, feed and sales records are kept.'))return;S.flocks=S.flocks.filter(function(f){return f.id!==id});S.adjust=S.adjust.filter(function(a){return a.flock!==id});save();render()}
+ '<h2>Add flock / cage</h2>'+FORM('flock','fl',F('fl','name','Name')+'<div class="row">'+SEL('fl','kind','Type',[['Flock','Flock (floor / free range)'],['Cage','Cage']],'Flock')+NUM('fl','hens','Number of hens')+'</div><div class="row">'+F('fl','breed','Breed (optional)')+DT('fl','start','Start date')+'</div>','Add')+
+ (act.length?'<h2>Change number of hens</h2>'+FORM('adj','ad',SEL('ad','flock','Flock / cage',flockOpts(false,true),act[0].id)+'<div class="row">'+SEL('ad','type','What happened',[['added','New hens added'],['death','Died'],['cull','Culled'],['sold','Sold'],['correction','Count correction (+)'],['correctionm','Count correction (−)']],'death')+NUM('ad','n','How many hens')+'</div>'+DT('ad','date','Date')+F('ad','reason','Note (optional)'),'Save change')+
+  (act.length>1?'<h2>Move hens between flocks / cages</h2>'+FORM('xfer','xf',SEL('xf','from','From',flockOpts(false,true),act[0].id)+SEL('xf','to','To',flockOpts(false,true),act[1].id)+'<div class="row">'+NUM('xf','n','How many')+DT('xf','date','Date')+'</div>','Move hens'):'')+
+  '<h2>Close a flock / cage</h2><p class="hint">Closing keeps all its history. It stops appearing in entry forms.</p>'+FORM('close','cf',SEL('cf','flock','Flock / cage',flockOpts(false,true),act[0].id)+DT('cf','date','Closing date'),'Close flock'):'')+
+ (hist?'<h2>Hen count history</h2><div class="panel">'+hist+'</div>':'')}
+H.flock=function(){opAdd('flocks',{name:G('fl','name'),kind:G('fl','kind'),hens:G('fl','hens'),breed:G('fl','breed'),start:G('fl','start'),status:'active',closed:''})};
+H.adj=function(){var t=G('ad','type'),sign=1;if(t==='death'||t==='cull'||t==='sold'||t==='correctionm')sign=-1;if(t==='correctionm')t='correction';
+ var n=cleanObj({n:{t:'int',req:1,min:1,max:100000}},{n:G('ad','n')},S);if(n.errs.length)fail('Number of hens '+n.errs[0].msg.replace(/^.*? (is|must)/,'$1'),'n');
+ opAdd('adjust',{flock:G('ad','flock'),date:G('ad','date'),delta:sign*n.rec.n,type:t,reason:G('ad','reason')||({death:'Died',cull:'Culled',sold:'Sold',added:'New hens added'}[t]||'')})};
+H.xfer=function(){opTransfer({from:G('xf','from'),to:G('xf','to'),n:G('xf','n'),date:G('xf','date'),reason:'Transfer'})};
+H.close=function(){opSetFlockStatus(parseInt(G('cf','flock'),10),'closed',G('cf','date'))};
+function reopenFlock(id){try{opSetFlockStatus(id,'active','');render()}catch(e){errBox(e)}}
+function delXfer(x){if(!confirm('Delete this transfer (both sides)?'))return;try{opDelTransfer(x);render()}catch(e){errBox(e)}}
 
-/* ---- reports ---- */
+/* ---------- Reports ---------- */
 function reportsView(){
- var f=fin(from()),per=[[7,'Last 7 days'],[30,'Last 30 days'],[90,'Last 90 days'],[0,'All time']];
- var vend={},wd={};f.sales.forEach(function(s){var k=s.vendor+(s.place?' – '+s.place:'');(vend[k]=vend[k]||{e:0,m:0});vend[k].e+=s.eggs;vend[k].m+=s.eggs*s.price;var d=dow(s.date);(wd[d]=wd[d]||{e:0,m:0,n:0});wd[d].e+=s.eggs;wd[d].m+=s.eggs*s.price;wd[d].n++});
- var vr=Object.keys(vend).sort(function(a,b){return vend[b].m-vend[a].m}).map(function(k){return [esc(k),vend[k].e,money(vend[k].m)]});
- var wr=Object.keys(wd).map(Number).sort(function(a,b){return wd[b].m-wd[a].m}).map(function(d){return [DAYS[d],wd[d].n,wd[d].e,money(wd[d].m)]});
- var rows=[['Egg sales',money(f.inc)],['Feed bought',money(f.feed)],['Sprays & medicine',money(f.spray)],['Egg trays',money(f.tray)],['<b>Total costs</b>','<b>'+money(f.exp)+'</b>'],['<b>Profit</b>','<b class="'+(f.profit<0?'warn-t':'ok-t')+'">'+money(f.profit)+'</b>']];
- return '<h1>Reports</h1><p class="sub">All totals in Namibian dollars (N$).</p>'+sel('rp','Period',per,rp,'onchange="rp=parseInt(this.value);render()"')+
- '<h2>Money</h2>'+tbl(['Item','N$'],rows)+
- '<div class="big" style="margin-top:10px"><div class="stat"><b>'+f.laid+'</b><span>eggs laid</span></div><div class="stat"><b>'+f.sold+'</b><span>eggs sold</span></div><div class="stat"><b>'+f.broken+'</b><span>broken'+(f.laid?' ('+r1(f.broken/f.laid*100)+'%)':'')+'</span></div><div class="stat"><b>'+(f.costEgg?money(f.costEgg):'–')+'</b><span>cost per good egg · avg sold '+(f.avgPrice?money(f.avgPrice):'–')+'</span></div></div>'+
- '<h2>Eggs per hen — by flock / cage</h2>'+perFlockTable(from())+
- '<h2>Sales by vendor / place</h2>'+(vr.length?tbl(['Vendor','Eggs','Sales'],vr):none('No sales in this period.'))+
- '<h2>Sales by day of the week</h2>'+(wr.length?tbl(['Day','Sales','Eggs','N$'],wr):none('No sales in this period.'));
-}
+ var rg=periodRange(RP.kind,RP.from,RP.to),f=fin(rg.from,rg.to);
+ var per=[['today','Today'],['week','This week'],['month','This month'],['year','This year'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days'],['all','All time'],['custom','Custom dates']];
+ function row(label,key,val,neg){return [label+(DRILL[key]?'':''),raw((DRILL[key]?'<a href="#" onclick="DR=\''+key+'\';render();return false">':'')+esc((neg?'−':'')+money(val))+(DRILL[key]?'</a>':''))]}
+ var cash=[row('Payments received','received',f.received),row('Refunds paid','refunded',f.refunded,1),['Cash in (net)',bold(money(f.cashIn))],row('Feed bought','feedBought',f.feedBought,1),row('Trays bought','trayBought',f.trayBought,1),row('Sprays & medicine','spray',f.spray,1),row('Other expenses','expenses',f.expenses,1),['Cash out',bold(money(f.cashOut))],['Cash flow',bold(money(f.cashFlow),f.cashFlow<0?'warn-t':'ok-t')]];
+ var prof=[row('Egg sales','salesValue',f.salesValue),row('Credits / returns','credits',f.credits,1),['Revenue',bold(money(f.revenue))],['Feed consumed (average cost)',money(f.feedConsumed)],['Trays used (estimate)',money(f.trayConsumed)],row('Sprays & medicine','spray',f.spray,1),row('Other expenses','expenses',f.expenses,1),['Estimated costs',bold(money(f.estCosts))],['Estimated profit',bold(money(f.estProfit),f.estProfit<0?'warn-t':'ok-t')]];
+ var dr='';if(DR&&DRILL[DR]){var rows=drill(DR,rg.from,rg.to),tot=0;rows.forEach(function(r){tot+=Math.round((r.amount||0)*100)});dr='<h2>Transactions behind this figure</h2>'+tbl(['Date','Details','N$'],rows.map(function(r){return [r.date,r.title,money(r.amount)]}).concat([[raw('<b>Total</b>'),'',bold(money(tot/100))]]))+'<button type="button" class="alt" onclick="DR=\'\';render()">Close list</button>'}
+ var sp=stockPeriod(rg.from==='0000-00-00'?'2000-01-01':rg.from,rg.to==='9999-12-31'?today():rg.to);
+ var bk=buckets(RP.gran,rg.from,rg.to).slice(0,60).map(function(b){return [b.key,b.laid,b.sold,money(b.sales),money(b.cashIn),money(b.cashOut)]});
+ var cs={},wd={};f.sales.forEach(function(s){var k=s.vendor+(s.place?' – '+s.place:'');var o=cs[k]||(cs[k]={e:0,m:0});o.e+=s.eggs;o.m+=saleTotal(s);var d=dow(s.date),w=wd[d]||(wd[d]={e:0,m:0,n:0});w.e+=s.eggs;w.m+=saleTotal(s);w.n++});
+ var cr=Object.keys(cs).sort(function(a,b){return cs[b].m-cs[a].m}).map(function(k){return [k,cs[k].e,money(cs[k].m)]}),wr=Object.keys(wd).map(Number).sort(function(a,b){return wd[b].m-wd[a].m}).map(function(d){return [DAYS[d],wd[d].n,wd[d].e,money(wd[d].m)]});
+ return '<h1>Reports</h1><p class="sub">All totals in Namibian dollars (N$). Tap an underlined figure to see the transactions behind it.</p>'+
+ '<div class="panel"><div class="row"><div><label for="rp_k">Period</label><select id="rp_k" onchange="RP.kind=this.value;DR=\'\';render()">'+per.map(function(p){return '<option value="'+p[0]+'"'+(RP.kind===p[0]?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</select></div><div><label for="rp_g">Group by</label><select id="rp_g" onchange="RP.gran=this.value;render()">'+[['day','Day'],['week','Week'],['month','Month'],['year','Year']].map(function(p){return '<option value="'+p[0]+'"'+(RP.gran===p[0]?' selected':'')+'>'+p[1]+'</option>'}).join('')+'</select></div></div>'+
+ (RP.kind==='custom'?'<div class="row"><div><label for="rp_f">From</label><input id="rp_f" type="date" value="'+esc(RP.from)+'" onchange="RP.from=this.value;render()"></div><div><label for="rp_t">To</label><input id="rp_t" type="date" value="'+esc(RP.to)+'" onchange="RP.to=this.value;render()"></div></div>':'')+'</div>'+
+ '<h2>Cash flow</h2><p class="hint">Money that actually moved: received from customers, paid out for purchases.</p>'+tbl(['Item','N$'],cash)+
+ '<h2>Estimated profit</h2><p class="hint">Sales earned less the cost of feed and trays actually used (not what was bought), plus sprays and expenses. It can differ a lot from cash flow.</p>'+tbl(['Item','N$'],prof)+dr+
+ '<div class="big" style="margin-top:10px"><div class="stat"><b>'+f.laid+'</b><span>eggs collected</span></div><div class="stat"><b>'+f.sold+'</b><span>eggs sold</span></div><div class="stat"><b>'+f.broken+' / '+f.rejected+'</b><span>broken / rejected</span></div><div class="stat"><b>'+(f.costEgg?esc(money(f.costEgg)):'–')+'</b><span>cost per saleable egg · avg price '+(f.avgPrice?esc(money(f.avgPrice)):'–')+'</span></div></div>'+
+ '<h2>Stock movement</h2>'+tbl(['Item','Eggs'],[['Opening stock',String(sp.openingClosing)],['+ Collected',String(sp.collected)],['− Broken / rejected',String(-(sp.broken+sp.rejected))],['− Sold',String(-sp.sold)],['− Own use / gifts / losses',String(-(sp.internal+sp.gifts+sp.losses))],['+ Returns / adjustments / counts',String(sp.returns+sp.adjustments+sp.counts)],['− On hold',String(-sp.withheld)],[raw('<b>Closing sellable stock</b>'),bold(sp.closing)]])+
+ '<h2>Production by flock / cage</h2>'+prodTable(production(rg.from,rg.to))+
+ '<h2>By '+RP.gran+'</h2>'+(bk.length?tbl([RP.gran==='day'?'Day':RP.gran==='week'?'Week starting':RP.gran==='month'?'Month':'Year','Eggs laid','Eggs sold','Sales','Cash in','Cash out'],bk):none('Nothing recorded in this period.'))+
+ '<h2>Sales by customer</h2>'+(cr.length?tbl(['Customer','Eggs','Sales'],cr):none('No sales in this period.'))+'<h2>Sales by day of the week</h2>'+(wr.length?tbl(['Day','Sales','Eggs','N$'],wr):none('No sales in this period.'))}
 
-/* ---- setup, backup ---- */
+/* ---------- History: search, filter, change log ---------- */
+function historyView(){
+ var all=transactions(),kinds={};all.forEach(function(r){kinds[r.kind]=1});
+ var q=HF.q.trim().toLowerCase(),rows=all.filter(function(r){return(!HF.kind||r.kind===HF.kind)&&(!isDate(HF.from)||r.date>=HF.from)&&(!isDate(HF.to)||r.date<=HF.to)&&(!q||(r.title+' '+r.detail+' '+r.date).toLowerCase().indexOf(q)>=0)});
+ var shown=rows.slice(0,HF.n),canEdit={eggs:1,sales:1,moves:1,payments:1,expenses:1};
+ var list=shown.map(function(r){return item(r.title,r.date+' · '+r.kind+(r.detail?' · '+r.detail:''),r.amount!=null?bold(money(r.amount)):'',(r.coll==='adjust'?'':acts(r.coll,r.id,!!canEdit[r.coll]&&!(r.coll==='moves'&&/^return/.test(r.title)))))}).join('');
+ var au=S.audit.slice().reverse().slice(0,40).map(function(a){var undo=a.action==='delete'&&a.before&&!(byId(S[a.kind]||[],a.recId))&&SPEC[a.kind];
+  return item(a.action+' · '+a.kind,new Date(a.ts).toLocaleString('en-GB')+(a.note?' · '+a.note:''),'',undo?btn('Restore','restoreRec('+a.id+')','plain'):'')}).join('');
+ return '<h1>History</h1><p class="sub">Search every record. Edit or delete from here.</p><div class="panel"><label for="hf_q">Search</label><input id="hf_q" type="search" value="'+esc(HF.q)+'" placeholder="customer, flock, product..." onchange="HF.q=this.value;HF.n=60;render()">'+
+ '<div class="row"><div><label for="hf_k">Type</label><select id="hf_k" onchange="HF.kind=this.value;HF.n=60;render()"><option value="">All</option>'+Object.keys(kinds).sort().map(function(k){return '<option'+(HF.kind===k?' selected':'')+'>'+esc(k)+'</option>'}).join('')+'</select></div><div></div></div>'+
+ '<div class="row"><div><label for="hf_f">From</label><input id="hf_f" type="date" value="'+esc(HF.from)+'" onchange="HF.from=this.value;render()"></div><div><label for="hf_t">To</label><input id="hf_t" type="date" value="'+esc(HF.to)+'" onchange="HF.to=this.value;render()"></div></div></div>'+
+ '<p class="hint">'+rows.length+' record'+(rows.length===1?'':'s')+'</p><div class="panel">'+(list||none('Nothing found.'))+'</div>'+
+ (rows.length>shown.length?'<button type="button" class="alt" onclick="HF.n+=60;render()">Show more</button>':'')+
+ '<button type="button" class="alt" onclick="exportRows()">Download these as CSV</button>'+
+ '<h2>Change log</h2><p class="hint">Edits, deletions, stock corrections, imports and restores.</p><div class="panel">'+(au||none('No changes logged yet.'))+'</div>'}
+function restoreRec(id){try{opRestore(id,{ok:{overpay:true,feedneg:true,dupsale:true,manyeggs:true,feedhigh:true}});NOTICE='Restored ✓';render();flash()}catch(e){errBox(e)}}
+
+/* ---------- Setup, backup, restore ---------- */
 function setupView(){
- var s=S.settings;
- return '<h1>Setup</h1><p class="sub">Defaults, backup and moving data between computers.</p><form onsubmit="saveSettings(event)">'+inp('gfarm','Farm name',{val:s.farm})+
- '<div class="row">'+inp('gp','Default price per egg (N$)',{type:'number',attr:'step="0.01" min="0"',val:s.price})+inp('gt','Eggs per tray',{type:'number',attr:'min="1"',val:s.tray})+'</div>'+
- '<div class="row">'+inp('gc','Clean every (days)',{type:'number',attr:'min="1"',val:s.clean})+inp('gtl','Warn when trays below',{type:'number',attr:'min="0"',val:s.trayLow})+'</div>'+
- inp('gfl','Warn when feed below (kg)',{type:'number',attr:'min="0"',val:s.feedLow})+'<button type="submit">Save settings</button></form>'+
- '<h2>Backup & share</h2><div class="panel"><p class="hint" style="margin-top:0">Data lives only in this browser on this computer. Download a backup often. To move it, open the app on the other computer and use <b>Restore backup</b>.</p>'+
- '<button onclick="exportJSON()">Download backup (.json)</button><button class="alt" onclick="exportCSV(\'sales\')">Download sales (.csv for Excel)</button><button class="alt" onclick="exportCSV(\'eggs\')">Download egg log (.csv)</button><button class="alt" onclick="exportCSV(\'costs\')">Download costs (.csv)</button>'+
- '<label for="imp">Restore backup (.json)</label><input id="imp" type="file" accept=".json,application/json" onchange="importJSON(this)"></div>'+
- '<h2>Alerts</h2><div class="panel"><p class="hint" style="margin-top:0">Reminders show on the Home tab. You can also allow a pop-up alert whenever you open the app.</p><button class="alt" onclick="askNotify()">Allow pop-up alerts</button></div>'+
- '<h2>Sample data</h2><div class="panel"><p class="hint" style="margin-top:0">Fills the app with made-up flocks, sales and costs so you can try it out. It replaces what is there now.</p><button class="alt" onclick="sample()">Load sample data</button><button class="alt" onclick="wipe()" style="color:var(--red)">Erase everything</button></div>';
-}
-function saveSettings(e){e.preventDefault();S.settings={farm:V('gfarm')||'My Egg Farm',price:N('gp'),tray:Math.max(1,N('gt')),clean:Math.max(1,N('gc')),trayLow:N('gtl'),feedLow:N('gfl')};save();render();alert('Saved.')}
-function download(name,text,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
-function exportJSON(){download('cooplog-backup-'+today()+'.json',JSON.stringify(S,null,1),'application/json')}
-function importJSON(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!Array.isArray(o.flocks))throw 0;if(!confirm('Replace the data in this app with the backup?'))return;adopt(o);save();render(true);alert('Backup restored.')}catch(e){alert('That file is not a CoopLog backup.')}};r.readAsText(f)}
-function csvCell(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
-function exportCSV(w){var h,rows;
- if(w==='sales'){h=['Date','Day','Vendor','Place','Eggs','Price per egg N$','Total N$','Note'];rows=S.sales.slice().sort(sortD).map(function(s){return [s.date,DAYS[dow(s.date)],s.vendor,s.place,s.eggs,s.price,(s.eggs*s.price).toFixed(2),s.note]})}
- else if(w==='eggs'){h=['Date','Flock/cage','Eggs','Broken','Hens that day','Eggs per hen','Feed type','Feed kg'];rows=S.eggs.slice().sort(sortD).map(function(e){var f=byId(S.flocks,e.flock),hn=f?henAt(f,e.date):0;return [e.date,flockName(e.flock),e.eggs,e.broken,hn,hn?(e.eggs/hn).toFixed(2):'',feedName(e.feedType),e.feedKg]})}
- else{h=['Date','Category','Detail','Where','N$'];rows=[].concat(S.feedBuys.map(function(b){return [b.date,'Feed',feedName(b.type)+' '+b.bags+'x'+b.bagKg+'kg',b.where,b.cost]}),S.sprays.filter(function(s){return s.cost}).map(function(s){return [s.date,'Spray/medicine',s.product+' ('+flockName(s.flock)+')','',s.cost]}),S.trayBuys.map(function(b){return [b.date,'Egg trays',b.qty+' trays',b.supplier,b.cost]})).sort(function(a,b){return a[0]<b[0]?1:-1})}
- download('cooplog-'+w+'-'+today()+'.csv','﻿'+[h].concat(rows).map(function(r){return r.map(csvCell).join(',')}).join('\r\n'),'text/csv')}
-function wipe(){if(confirm('Erase ALL data in this app? Download a backup first.')&&confirm('Really erase everything?')){S=DEF();save();render(true)}}
-function askNotify(){try{Notification.requestPermission().then(function(p){alert(p==='granted'?'Alerts allowed.':'Alerts not allowed in this browser.')})}catch(e){alert('This browser does not support pop-up alerts.')}}
-function notifyOnOpen(){try{if(!window.Notification||Notification.permission!=='granted')return;var k='cooplog.notified',t=today();if(localStorage.getItem(k)===t)return;
- var r=reminders().filter(function(x){return x[0]!=='info'});if(!r.length)return;localStorage.setItem(k,t);new Notification(S.settings.farm+': '+r.length+' reminder'+(r.length>1?'s':''),{body:r.slice(0,3).map(function(x){return x[1].replace(/&[a-z#0-9]+;/g,'')}).join('\n')})}catch(e){}}
-function sample(){if(!confirm('Replace current data with sample data?'))return;
- var t=today(),d=DEF(),i,k=0;d.settings.farm='Sample Farm, Windhoek';
- d.flocks=[{id:1,name:'Cage 1',kind:'Cage',hens:60,breed:'Lohmann Brown',start:addDays(t,-120)},{id:2,name:'Free-range house',kind:'Flock',hens:40,breed:'Boschveld',start:addDays(t,-90)}];
- d.adjust=[{id:11,flock:1,date:addDays(t,-40),delta:-2,reason:'Died'},{id:12,flock:2,date:addDays(t,-15),delta:10,reason:'New hens added'}];
- d.feedTypes=[{id:21,name:'Layer mash',bagKg:50,note:''},{id:22,name:'Grower pellets',bagKg:50,note:'for new hens'}];
- for(i=45;i>=0;i--){var dt=addDays(t,-i);k++;d.eggs.push({id:1000+k,date:dt,flock:1,eggs:44+(k*7%9),broken:k%4,feedType:21,feedKg:6.5});d.eggs.push({id:2000+k,date:dt,flock:2,eggs:24+(k*5%8),broken:k%3?0:1,feedType:21,feedKg:4.5})}
- d.feedBuys=[{id:31,date:addDays(t,-40),type:21,bags:8,bagKg:50,cost:3200,where:'Agra Windhoek'},{id:32,date:addDays(t,-12),type:21,bags:6,bagKg:50,cost:2520,where:'Feedmaster'},{id:33,date:addDays(t,-20),type:22,bags:2,bagKg:50,cost:900,where:'Agra Windhoek'}];
- d.vendors=[{id:41,name:'Shoprite Okuryangava',place:'Windhoek',days:[2,5],price:3.8,remind:true},{id:42,name:'Katutura Market',place:'Katutura',days:[6],price:3.5,remind:true},{id:43,name:'Mama Ndapewa',place:'Wanaheda',days:[1,4],price:3.6,remind:false}];
- for(i=0;i<8;i++){var sd=addDays(t,-i*4-1),v=d.vendors[i%3];d.sales.push({id:5000+i,date:sd,vendor:v.name,place:v.place,eggs:30*(3+i%4),price:v.price,note:''})}
- d.suppliers=[{id:61,name:'Packaging Hub',place:'Windhoek Industrial',note:'Open Mon-Fri'},{id:62,name:'Pick n Pay wholesale',place:'Windhoek',note:'Bulk tray packs'}];
- d.trayBuys=[{id:71,date:addDays(t,-30),supplier:'Packaging Hub',qty:20,cost:240},{id:72,date:addDays(t,-10),supplier:'Pick n Pay wholesale',qty:10,cost:140}];
- d.sprays=[{id:81,date:addDays(t,-6),product:'Red mite spray',kind:'Mite / lice spray',flock:2,cost:180,wd:0,again:14,notes:'sprayed perches'},{id:82,date:addDays(t,-2),product:'Ivermectin dewormer',kind:'Dewormer',flock:1,cost:120,wd:7,again:0,notes:'in drinking water'}];
- d.cleans=[{id:91,flock:1,date:addDays(t,-13),task:'Cage trays emptied'},{id:92,flock:2,date:addDays(t,-5),task:'Coop cleaned'}];
- adopt(d);save();render(true)}
+ var s=S.settings,rps=listRestorePoints().length;
+ var pv=PV?previewPanel():'';
+ var q=S.quarantine.slice(0,20).map(function(x,i){return item(x.coll+' · '+x.reason,JSON.stringify(x.rec).slice(0,150),'',btn('Delete','delQ('+i+')'))}).join('');
+ return '<h1>Setup</h1><p class="sub">Defaults, backups and moving data between computers. Version '+APP_VERSION+'.</p>'+
+ FORM('settings','gs',F('gs','farm','Farm name',{val:s.farm})+'<div class="row">'+NUM('gs','price','Default price per egg (N$)',{dec:1,val:s.price})+NUM('gs','tray','Eggs per tray',{val:s.tray})+'</div><div class="row">'+NUM('gs','clean','Clean every (days)',{val:s.clean})+NUM('gs','trayLow','Warn when trays below',{val:s.trayLow})+'</div><div class="row">'+NUM('gs','feedLow','Warn when feed below (kg)',{dec:1,val:s.feedLow})+NUM('gs','reorderDays','Reorder when days of feed left below',{val:s.reorderDays})+'</div>'+NUM('gs','lowRatio','Flag low production below lay rate (%)',{val:s.lowRatio}),'Save settings')+
+ '<h2>Backup & share</h2><div class="panel"><p class="hint" style="margin-top:0">Data lives only in this browser on this computer. <b>'+esc(backupText())+'.</b> A backup counts as confirmed only when the file was saved by your browser, or when you verify it below.</p>'+
+ '<button type="button" onclick="exportBackup()">Save backup file</button><label for="vf">Verify a backup file</label><input id="vf" type="file" accept=".json,application/json" onchange="verifyFile(this)"><div id="vmsg" class="hint" role="status">'+esc(VMSG)+'</div></div>'+
+ '<h2>Restore from a backup</h2><div class="panel"><p class="hint" style="margin-top:0">The file is fully checked first. Your current data is copied to a restore point before anything is replaced.</p><label for="imp">Choose backup file (.json)</label><input id="imp" type="file" accept=".json,application/json" onchange="readImport(this)">'+pv+(rps?'<button type="button" class="alt" onclick="doUndo()">Undo last restore ('+rps+' restore point'+(rps>1?'s':'')+')</button>':'')+'</div>'+
+ '<h2>Excel exports (CSV)</h2><div class="panel"><button type="button" class="alt" onclick="exportCSV(\'sales\')">Sales</button><button type="button" class="alt" onclick="exportCSV(\'eggs\')">Egg log</button><button type="button" class="alt" onclick="exportCSV(\'money\')">Payments & expenses</button><button type="button" class="alt" onclick="exportRows()">Everything (all records)</button></div>'+
+ '<h2>Alerts</h2><div class="panel"><p class="hint" style="margin-top:0">Reminders show on Home. You can also allow a pop-up when you open the app.</p><button type="button" class="alt" onclick="askNotify()">Allow pop-up alerts</button></div>'+
+ (q?'<h2>Quarantine</h2><p class="hint">Records that failed validation. They are kept here so nothing is lost.</p><div class="panel">'+q+'</div>':'')+
+ '<h2>Sample data & reset</h2><div class="panel"><p class="hint" style="margin-top:0">Both options first save a restore point you can undo.</p><button type="button" class="alt" onclick="loadSample()">Load sample data</button><button type="button" class="alt" style="color:var(--red)" onclick="wipe()">Erase everything</button></div>'}
+H.settings=function(){opSettings({farm:G('gs','farm'),price:G('gs','price'),tray:G('gs','tray'),clean:G('gs','clean'),trayLow:G('gs','trayLow'),feedLow:G('gs','feedLow'),reorderDays:G('gs','reorderDays'),lowRatio:G('gs','lowRatio')})};
+function previewPanel(){var p=PV;
+ if(p.fatal)return '<div class="banner bad" role="alert"><b>Cannot import.</b> '+esc(p.fatal)+'</div><button type="button" class="alt" onclick="PV=null;render()">Close</button>';
+ var cnt=Object.keys(p.counts).filter(function(k){return p.counts[k]}).map(function(k){return k+': '+p.counts[k]}).join(', ');
+ var errs=p.errors.slice(0,15).map(function(e){return '<li>'+esc(e)+'</li>'}).join('');
+ return '<div class="banner '+(p.ok?'info':'bad')+'" role="status"><b>'+(p.ok?'This file passed every check.':'This file has '+p.errors.length+' problem'+(p.errors.length>1?'s':'')+'.')+'</b><br>Contains: '+esc(cnt||'no records')+'.'+(errs?'<ul>'+errs+(p.errors.length>15?'<li>and '+(p.errors.length-15)+' more</li>':'')+'</ul>':'')+'</div>'+
+  (p.ok?'<button type="button" onclick="doImport(false)">Replace my data with this backup</button>':(p.state?'<button type="button" class="alt" onclick="doImport(true)">Import only the valid records (problem records go to Quarantine)</button>':''))+'<button type="button" class="alt" onclick="PV=null;render()">Cancel</button>'}
+function readImport(inp){var f=inp.files[0];if(!f)return;
+ if(f.size>20*1024*1024){PV={fatal:'The file is larger than 20 MB, which is not a normal CoopLog backup.'};render();return}
+ var r=new FileReader();r.onload=function(){PV=previewImport(String(r.result));render()};r.onerror=function(){PV={fatal:'The file could not be read.'};render()};r.readAsText(f)}
+function doImport(partial){if(!PV)return;if(!confirm('Replace the data in this app with the file?\n\nYour current data is saved to a restore point first.'))return;
+ try{applyImport(PV,partial);PV=null;EDIT={k:'',id:0};NOTICE='Backup restored ✓';render(true);flash()}catch(e){errBox(e)}}
+function doUndo(){if(!confirm('Go back to the data from before the last restore?'))return;try{undoRestore();NOTICE='Previous data restored ✓';render(true);flash()}catch(e){errBox(e)}}
+function verifyFile(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var v=verifyBackupText(String(r.result));VMSG=(v.ok?'✓ ':'✗ ')+v.msg;if(v.ok&&v.same){try{markBackup(true);NOTICE='Backup verified ✓'}catch(e){}}render();flash()};r.readAsText(f)}
+function delQ(i){if(!confirm('Delete this quarantined record for good?'))return;try{commit(function(){var x=S.quarantine.splice(i,1)[0];audit(S,'delete','quarantine',{id:0},x,null,'quarantined record deleted')});render()}catch(e){errBox(e)}}
+function loadSample(){if(!confirm('Replace your data with sample data?'))return;if(!createRestorePoint()){alert('Could not save a restore point, so nothing was changed.');return}
+ try{var res=ingest(sampleRaw());replaceState(res.state,'sample data loaded','import');EDIT={k:'',id:0};render(true)}catch(e){errBox(e)}}
+function wipe(){if(!confirm('Erase ALL data in this app? A restore point is saved first.')||!confirm('Really erase everything?'))return;
+ if(!createRestorePoint()){alert('Could not save a restore point, so nothing was erased. Download a backup first.');return}
+ try{var d=DEF();d.settings=Object.assign({},S.settings);replaceState(d,'all data erased','restore');EDIT={k:'',id:0};render(true)}catch(e){errBox(e)}}
 
-render();notifyOnOpen();
+/* ---------- exports (backup honesty: never claim success we cannot see) ---------- */
+function dlText(name,text,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}
+function dlRaw(){var r=loadError||'';if(!r)try{r=localStorage.getItem(KEY)||''}catch(e){}dlText('cooplog-raw-data-'+today()+'.txt',r||'(nothing stored)','text/plain')}
+function exportBackup(){
+ var txt=JSON.stringify(makeEnvelope(S),null,1),name='cooplog-backup-'+today()+'.json';
+ if(window.showSaveFilePicker){
+  window.showSaveFilePicker({suggestedName:name,types:[{description:'CoopLog backup',accept:{'application/json':['.json']}}]}).then(function(h){return h.createWritable().then(function(w){return w.write(txt).then(function(){return w.close()})}).then(function(){markBackup(true);NOTICE='Backup saved to '+h.name+' ✓';render();flash()})})
+  .catch(function(e){if(e&&e.name==='AbortError'){NOTICE='Backup cancelled';flash();return}alert('The backup could not be written to the file: '+(e&&e.message||e)+'\n\nNo backup was made.')});return}
+ dlText(name,txt,'application/json');markBackup(false);render();
+ alert('Backup download started. It is NOT confirmed until you see the file in your Downloads folder.\n\nTo confirm it, use "Verify a backup file" and choose that file.')}
+function csvCell(v){v=v==null?'':v;if(typeof v==='number')return String(v);v=String(v);if(/^[=+\-@\t\r]/.test(v))v="'"+v;return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function csvOut(name,head,rows){dlText('cooplog-'+name+'-'+today()+'.csv','﻿'+[head].concat(rows).map(function(r){return r.map(csvCell).join(',')}).join('\r\n'),'text/csv')}
+function exportCSV(w){
+ if(w==='sales'){var st=saleStatus();csvOut('sales',['Date','Day','Customer','Place','Eggs','Price per egg N$','Total N$','Paid N$','Due N$','Note'],S.sales.slice().sort(byDateId).reverse().map(function(s){var x=st[s.id]||{paid:0,due:0};return [s.date,DAYS[dow(s.date)],s.vendor,s.place,s.eggs,s.price,saleTotal(s),x.paid,x.due,s.note]}))}
+ else if(w==='eggs')csvOut('eggs',['Date','Flock/cage','Collected','Broken','Rejected','Saleable','Grade','Hens that day','Eggs per hen','Feed','Feed kg'],S.eggs.slice().sort(byDateId).reverse().map(function(e){var f=byId(S.flocks,e.flock),h=f?henAt(f,e.date):0;return [e.date,fname(e.flock),e.eggs,e.broken,e.rejected,e.eggs-e.broken-e.rejected,e.grade,h,h?Math.round(e.eggs/h*100)/100:'',ftname(e.feedType),e.feedKg]}));
+ else csvOut('money',['Date','Type','Who / what','Method / category','N$','Note'],S.payments.map(function(p){return [p.date,p.kind==='in'?'Payment in':'Refund paid',p.customer,p.method,p.kind==='in'?p.amount:-p.amount,p.note]}).concat(S.expenses.map(function(x){return [x.date,'Expense',x.cat,x.method,x.amt,x.note]})).sort(function(a,b){return a[0]<b[0]?1:-1}))}
+function exportRows(){var q=HF.q.trim().toLowerCase(),rows=transactions().filter(function(r){return(!HF.kind||r.kind===HF.kind)&&(!isDate(HF.from)||r.date>=HF.from)&&(!isDate(HF.to)||r.date<=HF.to)&&(!q||(r.title+' '+r.detail+' '+r.date).toLowerCase().indexOf(q)>=0)});
+ csvOut('records',['Date','Type','Details','Note','N$','Quantity'],rows.map(function(r){return [r.date,r.kind,r.title,r.detail,r.amount==null?'':r.amount,r.qty==null?'':r.qty]}))}
+function exportStatement(){var names=Object.keys(customers()).map(function(k){return customers()[k].name}),c=STM.cust&&names.indexOf(STM.cust)>=0?STM.cust:names[0];if(!c)return;
+ var r=statement(c,isDate(STM.from)?STM.from:'',isDate(STM.to)?STM.to:'');csvOut('statement-'+c.replace(/[^a-z0-9]+/gi,'-'),['Date','Details','Charged N$','Paid or credit N$','Balance N$'],[['','Balance brought forward','','',r.opening]].concat(r.rows.map(function(x){return [x.date,x.desc,x.debit||'',x.credit||'',x.balance]})).concat([['','Balance owed','','',r.closing]]))}
+function askNotify(){try{Notification.requestPermission().then(function(p){alert(p==='granted'?'Alerts allowed.':'Alerts not allowed in this browser.')})}catch(e){alert('This browser does not support pop-up alerts.')}}
+function notifyOnOpen(){try{if(!window.Notification||Notification.permission!=='granted')return;var k='cooplog.notified',t=today();if(localStorage.getItem(k)===t)return;var r=alerts().filter(function(x){return x.lvl!=='info'});if(!r.length)return;localStorage.setItem(k,t);new Notification(S.settings.farm+': '+r.length+' reminder'+(r.length>1?'s':''),{body:r.slice(0,3).map(function(x){return x.text}).join('\n')})}catch(e){}}
+
+/* ---------- start ---------- */
+window.addEventListener('storage',function(e){if(e.key===KEYREV&&String(S.rev)!==String(parseInt(e.newValue,10)||0)){conflict=true;render()}});
+window.addEventListener('beforeunload',function(e){if(unsaved||(storageDown&&S.eggs.length+S.sales.length>0)){e.preventDefault();e.returnValue=''}});
+loadState();render();notifyOnOpen();
+
 </script>
 </body>
 </html>
